@@ -115,11 +115,63 @@
         <mxCell id="ZgSJNyo04Z3pmwaCHUKf-43" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-40" target="ZgSJNyo04Z3pmwaCHUKf-42">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-55" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-40" target="ZgSJNyo04Z3pmwaCHUKf-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="ZgSJNyo04Z3pmwaCHUKf-40" value="큐에 원소가 있는가?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="507.5" y="230" width="207.5" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-42" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="460" y="310" width="300" height="80" as="geometry" />
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-48" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-42" target="ZgSJNyo04Z3pmwaCHUKf-47">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-42" value="현재노드 = Dequeue 반환값." style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="531.87" y="320" width="158.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-44" value="자식노드 전체 Enqueue" style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="480" y="490" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-49" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-47" target="ZgSJNyo04Z3pmwaCHUKf-44">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-52" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-47" target="ZgSJNyo04Z3pmwaCHUKf-51">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-47" value="자식 노드 있는가?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="619.38" y="380" width="160.62" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-50" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-44">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="340" as="sourcePoint" />
+            <mxPoint x="610" y="210" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="460" y="505" />
+              <mxPoint x="460" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-51" value="리프노드 리스트에 추가" style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="470" y="385" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-58" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-54" target="ZgSJNyo04Z3pmwaCHUKf-57">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-54" value="리프노드 리스트 반환" style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="770" y="227.5" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-56" value="" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-51">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="340" as="sourcePoint" />
+            <mxPoint x="460" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-60" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZgSJNyo04Z3pmwaCHUKf-57" target="ZgSJNyo04Z3pmwaCHUKf-59">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-57" value="리스트 내 노드 좌표값 연결하는&lt;div&gt;라인 생성(Visualizing)&lt;/div&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="720" y="475" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ZgSJNyo04Z3pmwaCHUKf-59" value="분할 완료" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="770" y="560" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
