@@ -22,7 +22,10 @@ internal class DungeonGenerator
         List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(bsp.RootNode); //반환값은 리프노드 전체
 
         RoomGenerator roomGenerator = new RoomGenerator(maxIterations, roomWidthMin, roomHeightMin); //이전까지는 방의 구획을 나눴으니, 실제로 방 생성하는 코드
-        List<RoomNode> roomList=roomGenerator.GenerateRoomsInGivenSpaces(roomSpaces); //리프노드 리스트 전달하여 방 생성하기
-        return new List<Node>(roomList);
+
+        //List<RoomNode> roomList=roomGenerator.GenerateRoomsInGivenSpaces(roomSpaces); //리프노드 리스트 전달하여 방 생성하기
+        //return new List<Node>(roomList);
+
+        return roomSpaces;
     }
 }
