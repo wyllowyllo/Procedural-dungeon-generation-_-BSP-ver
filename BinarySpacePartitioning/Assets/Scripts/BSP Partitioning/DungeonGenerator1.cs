@@ -15,13 +15,13 @@ internal class DungeonGenerator
         this.dungeonWidth = dungeonWidth;
         this.dungeonHeight = dungeonHeight;
     }
-    public List<Node> CalculateRooms(int maxIterations, int roomWidthMin, int roomHeightMin)
+    public List<RoomNode> CalculateRooms(int maxIterations, int roomWidthMin, int roomHeightMin)
     {
         BinarySpacePartitioner bsp = new BinarySpacePartitioner(dungeonWidth, dungeonHeight);
         allSpaceNodes=bsp.PrepareNodesCollection(maxIterations, roomWidthMin, roomHeightMin); //트리를 구성하는 노드 전체 받아오기
         RoomNode rootNode = allSpaceNodes[0];
 
-        List<Node> roomSpaces = FindLeafes(rootNode); //반환값은 리프노드 전체
+        List<RoomNode> roomSpaces = FindLeafes(rootNode); //반환값은 리프노드 전체
 
         return roomSpaces;
     }
@@ -39,14 +39,14 @@ internal class DungeonGenerator
         }
         return roomList;
     }
-    public List<Node> FindLeafes(RoomNode parentNode)
+    public List<RoomNode> FindLeafes(RoomNode parentNode)
     {
-        Queue<Node> nodesToCheck = new Queue<Node>();
+        Queue<RoomNode> nodesToCheck = new Queue<RoomNode>();
         List<RoomNode> listToReturn = new List<RoomNode>();
 
         if (parentNode.ChildrenNodeList.Count == 0)
         {
-            return new List<Node>() { parentNode }; 
+            return new List<RoomNode>() { parentNode }; 
         }
         foreach (var child in parentNode.ChildrenNodeList)
         {
@@ -54,7 +54,7 @@ internal class DungeonGenerator
         }
         while (nodesToCheck.Count > 0)
         {
-            Node currentNode = nodesToCheck.Dequeue();
+            RoomNode currentNode = nodesToCheck.Dequeue();
             if (currentNode.ChildrenNodeList.Count == 0)
             {
                 listToReturn.Add(currentNode); //자식 없다면(리프노드 도달) 반환값 리스트에 추가

@@ -15,24 +15,24 @@ public class RoomSpaceGenerator : MonoBehaviour
         this.dungeonWidth = dungeonWidth;
         this.dungeonHeight = dungeonHeight;
     }
-    public List<Node> CalculateRooms(int roomWidthMin, int roomHeightMin, int roomWidthMax, int roomHeightMax)
+    public List<RoomNode> CalculateRooms(int roomWidthMin, int roomHeightMin, int roomWidthMax, int roomHeightMax)
     {
         GroundPartitioner bsp = new GroundPartitioner(dungeonWidth, dungeonHeight);
         allSpaceNodes = bsp.PrepareNodesCollection(roomWidthMin, roomHeightMin, roomWidthMax, roomHeightMax); //트리를 구성하는 노드 전체 받아오기
-        List<Node> roomSpaces = FineLeafes(bsp.RootNode); //반환값은 리프노드 전체
+        List<RoomNode> roomSpaces = FindLeafes(allSpaceNodes[0]); //반환값은 리프노드 전체
 
-        
-        List<RoomNode> roomList = GenerateRoomsInGivenSpaces(roomSpaces); 
-        return new List<Node>(roomList);
+
+       
+        return roomSpaces;
     }
-    public static List<Node> FineLeafes(RoomNode parentNode)
+    public static List<RoomNode> FindLeafes(RoomNode parentNode)
     {
-        Queue<Node> nodesToCheck = new Queue<Node>();
-        List<Node> listToReturn = new List<Node>();
+        Queue<RoomNode> nodesToCheck = new Queue<RoomNode>();
+        List<RoomNode> listToReturn = new List<RoomNode>();
 
         if (parentNode.ChildrenNodeList.Count == 0)
         {
-            return new List<Node>() { parentNode }; //그냥 새로 생성해서 return(생성자 호출)
+            return new List<RoomNode>() { parentNode }; //그냥 새로 생성해서 return(생성자 호출)
         }
         foreach (var child in parentNode.ChildrenNodeList)
         {
@@ -56,20 +56,5 @@ public class RoomSpaceGenerator : MonoBehaviour
         return listToReturn;
     }
 
-    public List<RoomNode> GenerateRoomsInGivenSpaces(List<Node> roomSpaces)
-    {
-        List<RoomNode> listToReturn = new List<RoomNode>();
-        foreach (var space in roomSpaces)
-        {
-            Vector2Int newBottomLeftPoint = space.BottomLeftAreaCorner;
-            Vector2Int newTopRightPoint = space.TopRightAreaCorner;
-
-            space.BottomLeftAreaCorner = newBottomLeftPoint;
-            space.TopRightAreaCorner = newTopRightPoint;
-            space.BottomRightAreaCorner = new Vector2Int(newTopRightPoint.x, newBottomLeftPoint.y);
-            space.TopLeftAreaCorner = new Vector2Int(newBottomLeftPoint.x, newTopRightPoint.y);
-            listToReturn.Add((RoomNode)space);
-        }
-        return listToReturn;
-    }
+    
 }

@@ -14,7 +14,7 @@ public class DungeonCreator : MonoBehaviour
    
     public Material material; // For Visualizing
 
-    List<Node> listOfRooms;
+    List<RoomNode> listOfRooms;
     
    
 
