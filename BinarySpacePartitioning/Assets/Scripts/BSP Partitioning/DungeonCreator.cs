@@ -6,14 +6,16 @@ using UnityEngine.UI;
 
 public class DungeonCreator : MonoBehaviour
 {
-
+    
     public int dungeonWidth, dungeonHeight;
     public int roomWidthMin, roomHeightMin;
     public int maxIterations;
-    public int corridorWidth;
+    public int entranceSize;
+   
     public Material material; // For Visualizing
-    
 
+    List<Node> listOfRooms;
+    
    
 
     // Start is called before the first frame update
@@ -27,7 +29,7 @@ public class DungeonCreator : MonoBehaviour
     public void CreateDungeon()
     {
         DungeonGenerator generator = new DungeonGenerator(dungeonWidth,dungeonHeight);
-        var listOfRooms = generator.CalculateRooms(maxIterations, roomWidthMin, roomHeightMin);
+        listOfRooms = generator.CalculateRooms(maxIterations, roomWidthMin, roomHeightMin); //리프노드 리스트(실제 생성된 방 리스트)
 
         for (int i = 0; i < listOfRooms.Count; i++) 
         {
@@ -75,7 +77,9 @@ public class DungeonCreator : MonoBehaviour
         mesh.uv = uvs;
         mesh.triangles = triangles;
 
-        GameObject dungeonFloor = new GameObject("Mesh" + bottomLeftCorner, typeof(MeshFilter), typeof(MeshRenderer));
+        int width = (int)(topRightCorner.x - bottomLeftCorner.x);
+        int height=(int)(topRightCorner.y-bottomLeftCorner.y);
+        GameObject dungeonFloor = new GameObject("Mesh" + "("+width+", "+height+")", typeof(MeshFilter), typeof(MeshRenderer));
 
         dungeonFloor.transform.position= Vector3.zero;
         dungeonFloor.transform.localScale= Vector3.one;
@@ -95,6 +99,28 @@ public class DungeonCreator : MonoBehaviour
 
 
         line.enabled = true;
+
+    }
+
+    void CreateDoor()
+    {
+        List<Vector2Int> roomVertexes=new List<Vector2Int>();
+
+        //모든 방 꼭짓점 리스트 만들기
+        foreach (var room in listOfRooms)
+        {
+            roomVertexes.Add(room.BottomLeftAreaCorner);
+            roomVertexes.Add(room.BottomRightAreaCorner);
+            roomVertexes.Add(room.TopLeftAreaCorner);
+            roomVertexes.Add(room.TopRightAreaCorner);
+        }
+
+        //각 방 노드의 벽면 set
+        foreach(var room in listOfRooms)
+        {
+           
+        }
+
 
     }
 }

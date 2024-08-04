@@ -19,13 +19,54 @@ internal class DungeonGenerator
     {
         BinarySpacePartitioner bsp = new BinarySpacePartitioner(dungeonWidth, dungeonHeight);
         allSpaceNodes=bsp.PrepareNodesCollection(maxIterations, roomWidthMin, roomHeightMin); //트리를 구성하는 노드 전체 받아오기
-        List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(bsp.RootNode); //반환값은 리프노드 전체
+        RoomNode rootNode = allSpaceNodes[0];
 
-        RoomGenerator roomGenerator = new RoomGenerator(maxIterations, roomWidthMin, roomHeightMin); //이전까지는 방의 구획을 나눴으니, 실제로 방 생성하는 코드
-
-        //List<RoomNode> roomList=roomGenerator.GenerateRoomsInGivenSpaces(roomSpaces); //리프노드 리스트 전달하여 방 생성하기
-        //return new List<Node>(roomList);
+        List<Node> roomSpaces = FindLeafes(rootNode); //반환값은 리프노드 전체
 
         return roomSpaces;
+    }
+
+    public List<RoomNode> NodeToRoomNode(List<Node> nodeList)
+    {
+        List<RoomNode> roomList = new List<RoomNode>();
+        foreach (var space in nodeList)
+        {
+           /*space.BottomLeftAreaCorner = space.BottomLeftAreaCorner;
+            space.TopRightAreaCorner = space.TopRightAreaCorner;
+            space.BottomRightAreaCorner = new Vector2Int(newTopRightPoint.x, newBottomLeftPoint.y);
+            space.TopLeftAreaCorner = new Vector2Int(newBottomLeftPoint.x, newTopRightPoint.y);
+            roomList.Add((RoomNode)space);*/
+        }
+        return roomList;
+    }
+    public List<Node> FindLeafes(RoomNode parentNode)
+    {
+        Queue<Node> nodesToCheck = new Queue<Node>();
+        List<RoomNode> listToReturn = new List<RoomNode>();
+
+        if (parentNode.ChildrenNodeList.Count == 0)
+        {
+            return new List<Node>() { parentNode }; 
+        }
+        foreach (var child in parentNode.ChildrenNodeList)
+        {
+            nodesToCheck.Enqueue(child);
+        }
+        while (nodesToCheck.Count > 0)
+        {
+            Node currentNode = nodesToCheck.Dequeue();
+            if (currentNode.ChildrenNodeList.Count == 0)
+            {
+                listToReturn.Add(currentNode); //자식 없다면(리프노드 도달) 반환값 리스트에 추가
+            }
+            else
+            {
+                foreach (var child in currentNode.ChildrenNodeList)
+                {
+                    nodesToCheck.Enqueue(child); //자식 노드 탐방해야 하므로 인큐
+                }
+            }
+        }
+        return listToReturn;
     }
 }

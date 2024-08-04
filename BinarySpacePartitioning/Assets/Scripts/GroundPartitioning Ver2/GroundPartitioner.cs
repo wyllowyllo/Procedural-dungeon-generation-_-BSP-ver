@@ -56,21 +56,21 @@ public class GroundPartitioner
             node1 = new RoomNode(currentNode.BottomLeftAreaCorner, new Vector2Int(Random.Range(roomWidthRange_Min, roomWidthRange_Max)
                                 ,Random.Range(roomHeightRange_Min, roomHeightRange_Max))
                                 , currentNode
-                                , currentNode.TreeLayerIndex + 1);
+                                , currentNode.TreeIndex + 1);
             //오른쪽 아래 방
             node2 = new RoomNode(node1.BottomRightAreaCorner, new Vector2Int(currentNode.BottomRightAreaCorner.x, node1.TopRightAreaCorner.y)
                                , currentNode
-                               , currentNode.TreeLayerIndex + 1);
+                               , currentNode.TreeIndex + 1);
 
             //오른쪽 위 방
             node3 = new RoomNode(node1.TopRightAreaCorner, currentNode.TopRightAreaCorner
                                 , currentNode
-                                , currentNode.TreeLayerIndex + 1);
+                                , currentNode.TreeIndex + 1);
 
             //왼쪽 위 방
             node4 = new RoomNode(node1.TopLeftAreaCorner, node3.TopLeftAreaCorner
                                , currentNode
-                               , currentNode.TreeLayerIndex + 1);
+                               , currentNode.TreeIndex + 1);
         
 
         AddNewNodeToCollections(listToReturn, graph, node1);

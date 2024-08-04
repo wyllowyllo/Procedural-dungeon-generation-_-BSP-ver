@@ -234,7 +234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &756628170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,12 +247,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5790c0d49e46d4fb9e4fc6498a2ddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonWidth: 100
-  dungeonHeight: 100
-  roomWidthMin: 25
-  roomHeightMin: 25
-  maxIterations: 7
-  corridorWidth: 0
+  dungeonWidth: 200
+  dungeonHeight: 200
+  roomWidthMin: 40
+  roomHeightMin: 30
+  maxIterations: 5
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
 --- !u!4 &756628171
 Transform:
@@ -460,7 +459,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.6427876, y: 0, z: 0, w: 0.7660445}
-  m_LocalPosition: {x: 37.8, y: 180, z: 4.4}
+  m_LocalPosition: {x: 73.4, y: 254.5, z: 71.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -484,7 +483,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1912272152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -499,10 +498,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonWidth: 100
   dungeonHeight: 100
-  roomWidthMin: 20
-  roomHeightMin: 20
-  roomWidthMax: 50
-  roomHeightMax: 50
+  roomWidthMin: 10
+  roomHeightMin: 10
+  roomWidthMax: 20
+  roomHeightMax: 20
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
 --- !u!120 &1912272153
 LineRenderer:
