@@ -42,13 +42,15 @@ public class RoomNode
     public int Height { get => (int)(TopRightAreaCorner.y-BottomLeftAreaCorner.y);}
    
 
-    //벽
+    //리프노드(실제 방) 의 벽
     Wall leftWall;
     Wall rightWall;
     Wall bottomWall;
     Wall topWall;
     List<Wall> wallList= new List<Wall>();
     public List<Wall> WallList { get => wallList; }
+    //구분선
+     Wall divideLine;
 
 
     private void SetWall(Vector2Int leftBottomV, Vector2Int rightBottomV,Vector2Int rightTopV, Vector2Int leftTopV)
@@ -63,27 +65,14 @@ public class RoomNode
         wallList.Add(bottomWall);
         wallList.Add(topWall);
     }
-
-    public Wall GetWall(string wallType)
+    public void SetDivideLine(Vector2Int leftPoint, Vector2Int rightPoint)
     {
-        Wall returnWall=null;
-        switch(wallType)
-        {
-            case "Left":
-                returnWall = leftWall;
-                break;
-            case "Right":
-                returnWall = rightWall;
-                break;
-            case "Bottom":
-                returnWall = bottomWall;
-                break;
-            case "Top":
-                returnWall = topWall;
-                break;
-        }
-        return returnWall;
+        divideLine=new Wall(leftPoint, rightPoint);
+       
     }
+    public Wall GetDivideLine() { return divideLine; }
+
+    
     private void AddChild(RoomNode node)
     {
         childrenNodeList.Add(node);

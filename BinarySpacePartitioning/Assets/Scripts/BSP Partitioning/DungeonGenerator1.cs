@@ -26,19 +26,6 @@ internal class DungeonGenerator
         return roomSpaces;
     }
 
-    public List<RoomNode> NodeToRoomNode(List<Node> nodeList)
-    {
-        List<RoomNode> roomList = new List<RoomNode>();
-        foreach (var space in nodeList)
-        {
-           /*space.BottomLeftAreaCorner = space.BottomLeftAreaCorner;
-            space.TopRightAreaCorner = space.TopRightAreaCorner;
-            space.BottomRightAreaCorner = new Vector2Int(newTopRightPoint.x, newBottomLeftPoint.y);
-            space.TopLeftAreaCorner = new Vector2Int(newBottomLeftPoint.x, newTopRightPoint.y);
-            roomList.Add((RoomNode)space);*/
-        }
-        return roomList;
-    }
     public List<RoomNode> FindLeafes(RoomNode parentNode)
     {
         Queue<RoomNode> nodesToCheck = new Queue<RoomNode>();

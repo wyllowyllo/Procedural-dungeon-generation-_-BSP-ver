@@ -23,8 +23,8 @@ public class DungeonCreator : MonoBehaviour
     void Start()
     {
         CreateDungeon();
-        CreateDoor();
-        
+        //CreateDoor();
+        CreateEntrance();
     }
 
 
@@ -197,5 +197,97 @@ public class DungeonCreator : MonoBehaviour
 
 
     }
+
+    void CreateEntrance()
+    {
+        List<Vector2Int> roomVertexes = new List<Vector2Int>();
+
+        //모든 방 꼭짓점 리스트 만들기
+        foreach (var room in listOfRooms)
+        {
+            roomVertexes.Add(room.BottomLeftAreaCorner);
+            roomVertexes.Add(room.BottomRightAreaCorner);
+            roomVertexes.Add(room.TopLeftAreaCorner);
+            roomVertexes.Add(room.TopRightAreaCorner);
+        }
+
+        RoomNode parent;
+        RoomNode prevNode=null;
+
+        foreach (var room in listOfRooms)
+        {
+            //리프노드의 부모노드 찾아서, 분할선에 출입구 만들기
+            parent=room.Parent;
+
+            if(prevNode!=parent)
+                GenerateEntracne(parent, roomVertexes);
+
+            prevNode = parent;
+        }
+    }
+
+    void GenerateEntracne(RoomNode room, List<Vector2Int> roomVertexes)
+    {
+        Vector2Int doorCoordinate;
+        Wall line = room.GetDivideLine();
+
+            if (line.Orientation == Orientation.Horizontal)
+            {
+                doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);
+                foreach (var roomVertex in roomVertexes)
+                {
+                    while ((doorCoordinate.x <= roomVertex.x && doorCoordinate.y == roomVertex.y) && (roomVertex.x <= doorCoordinate.x + entranceSize && doorCoordinate.y == roomVertex.y)) //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
+                    {
+                        doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);  //재생성
+                    }
+
+                }
+            }
+            else
+            {
+                doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));
+                foreach (var roomVertex in roomVertexes)
+                {
+                    while ((doorCoordinate.y <= roomVertex.y && doorCoordinate.x == roomVertex.x) && (roomVertex.y <= doorCoordinate.y + entranceSize && doorCoordinate.x == roomVertex.x)) //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
+                    {
+                        doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));  //재생성
+                    }
+
+                }
+            }
+            line.AddDoor(doorCoordinate);
+
+            //OutLine
+            GameObject door = new GameObject("Door");
+
+            door.transform.position = Vector3.zero;
+            door.transform.localScale = Vector3.one;
+
+
+            LineRenderer lineDoor = door.AddComponent<LineRenderer>();
+            lineDoor.positionCount = 2;
+            lineDoor.startColor = Color.green;
+            lineDoor.endColor = Color.green;
+            lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+            lineDoor.sortingOrder = 1;
+
+            lineDoor.enabled = false;
+
+            if (line.Orientation == Orientation.Horizontal)
+            {
+                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
+            }
+            else
+            {
+                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
+            }
+
+
+            lineDoor.enabled = true;
+        }
+
+    
 
 }
