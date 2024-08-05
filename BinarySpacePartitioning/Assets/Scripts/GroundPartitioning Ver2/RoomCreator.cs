@@ -73,7 +73,9 @@ public class RoomCreator : MonoBehaviour
         mesh.uv = uvs;
         mesh.triangles = triangles;
 
-        GameObject dungeonFloor = new GameObject("Mesh" + bottomLeftCorner, typeof(MeshFilter), typeof(MeshRenderer));
+        int width = (int)(topRightCorner.x - bottomLeftCorner.x);
+        int height = (int)(topRightCorner.y - bottomLeftCorner.y);
+        GameObject dungeonFloor = new GameObject("Mesh" + "(" + width + ", " + height + ")", typeof(MeshFilter), typeof(MeshRenderer));
 
         dungeonFloor.transform.position = Vector3.zero;
         dungeonFloor.transform.localScale = Vector3.one;

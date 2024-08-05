@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Wall
 {
@@ -6,6 +7,7 @@ public class Wall
     Vector2Int leftVertex;
     Vector2Int rightVertex;
     int length;
+    List<Vector2Int> doorPos= new List<Vector2Int>();
 
     public Wall(Vector2Int leftVertex, Vector2Int rightVertex)
     {
@@ -20,4 +22,14 @@ public class Wall
     public Vector2Int RightVertex { get => rightVertex; }
     public Orientation Orientation { get => orientation; }
     public int Length { get => length; }
+
+    public void AddDoor(Vector2Int doorPosition)
+    {
+        doorPos.Add(doorPosition);
+    }
+    public int DoorNum()
+    {
+        return doorPos.Count;
+    }
+
 }

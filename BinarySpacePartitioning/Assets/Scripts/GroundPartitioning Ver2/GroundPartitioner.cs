@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 public class GroundPartitioner
@@ -37,24 +38,16 @@ public class GroundPartitioner
     private void SplitTheSpace(RoomNode currentNode, List<RoomNode> listToReturn, int roomWidthMin, int roomHeightMin, int roomWidthMax, int roomHeightMax, Queue<RoomNode> graph)
     {
         RoomNode node1, node2, node3, node4;
-        int roomWidthRange_Min=roomWidthMin;
-        int roomHeightRange_Min=roomHeightMin;
-        int roomWidthRange_Max;
-        int roomHeightRange_Max;
+        Vector2Int referencePoint=new Vector2Int(10000, 10000); //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표)
 
-        if ((currentNode.TopRightAreaCorner.x - roomWidthMin) > (currentNode.BottomLeftAreaCorner.x + roomWidthMax))
-            roomWidthRange_Max = (currentNode.BottomLeftAreaCorner.x + roomWidthMax);
-        else
-            roomWidthRange_Max = (currentNode.TopRightAreaCorner.x - roomWidthMin);
-
-        if ((currentNode.TopRightAreaCorner.y - roomHeightMin) > (currentNode.BottomLeftAreaCorner.y + roomHeightMax))
-            roomHeightRange_Max = (currentNode.BottomLeftAreaCorner.y + roomHeightMax);
-        else
-            roomHeightRange_Max = (currentNode.TopRightAreaCorner.y - roomHeightMin);
-
-            //왼쪽아래 방
-            node1 = new RoomNode(currentNode.BottomLeftAreaCorner, new Vector2Int(Random.Range(roomWidthRange_Min, roomWidthRange_Max)
-                                ,Random.Range(roomHeightRange_Min, roomHeightRange_Max))
+        //최대크기 넘지 않도록 
+        while(referencePoint.x>currentNode.BottomLeftAreaCorner.x+roomWidthMax || referencePoint.y > currentNode.BottomLeftAreaCorner.y + roomHeightMax)
+        {
+            referencePoint = new Vector2Int(Random.Range(currentNode.BottomLeftAreaCorner.x + roomWidthMin, currentNode.TopRightAreaCorner.x - roomWidthMin)
+                          , Random.Range(currentNode.BottomLeftAreaCorner.y + roomHeightMin, currentNode.TopRightAreaCorner.y - roomHeightMin));
+        }
+             //왼쪽아래 방
+            node1 = new RoomNode(currentNode.BottomLeftAreaCorner, referencePoint
                                 , currentNode
                                 , currentNode.TreeIndex + 1);
             //오른쪽 아래 방
@@ -71,6 +64,8 @@ public class GroundPartitioner
             node4 = new RoomNode(node1.TopLeftAreaCorner, node3.TopLeftAreaCorner
                                , currentNode
                                , currentNode.TreeIndex + 1);
+
+
         
 
         AddNewNodeToCollections(listToReturn, graph, node1);

@@ -69,4 +69,8 @@ internal class DungeonGenerator
         }
         return listToReturn;
     }
+    public RoomNode GetRootNode()
+    {
+        return rootNode;
+    }
 }

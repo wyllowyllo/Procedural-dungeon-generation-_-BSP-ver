@@ -33,23 +33,56 @@ public class RoomNode
         {
             parentNode.AddChild(this);
         }
+
+        SetWall(bottomLeftAreaCorner,BottomRightAreaCorner,topRightAreaCorner,TopLeftAreaCorner);
     }
     
     
     public int Width { get => (int)(TopRightAreaCorner.x-BottomLeftAreaCorner.x); }
     public int Height { get => (int)(TopRightAreaCorner.y-BottomLeftAreaCorner.y);}
+   
 
+    //벽
     Wall leftWall;
     Wall rightWall;
     Wall bottomWall;
     Wall topWall;
+    List<Wall> wallList= new List<Wall>();
+    public List<Wall> WallList { get => wallList; }
 
-    public void SetWall(Vector2Int leftBottomV, Vector2Int rightBottomV, Vector2Int rightTopV, Vector2Int leftTopV)
+
+    private void SetWall(Vector2Int leftBottomV, Vector2Int rightBottomV,Vector2Int rightTopV, Vector2Int leftTopV)
     {
         leftWall=new Wall(leftTopV, leftBottomV);
         rightWall = new Wall(rightTopV, rightBottomV);
         bottomWall = new Wall(leftBottomV, rightBottomV);
         topWall = new Wall(leftTopV, rightTopV);
+
+        wallList.Add(leftWall);
+        wallList.Add(rightWall);
+        wallList.Add(bottomWall);
+        wallList.Add(topWall);
+    }
+
+    public Wall GetWall(string wallType)
+    {
+        Wall returnWall=null;
+        switch(wallType)
+        {
+            case "Left":
+                returnWall = leftWall;
+                break;
+            case "Right":
+                returnWall = rightWall;
+                break;
+            case "Bottom":
+                returnWall = bottomWall;
+                break;
+            case "Top":
+                returnWall = topWall;
+                break;
+        }
+        return returnWall;
     }
     private void AddChild(RoomNode node)
     {

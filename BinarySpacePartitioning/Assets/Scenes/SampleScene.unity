@@ -234,7 +234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &756628170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,8 +251,8 @@ MonoBehaviour:
   dungeonHeight: 200
   roomWidthMin: 40
   roomHeightMin: 30
-  maxIterations: 30
-  entranceSize: 0
+  maxIterations: 15
+  entranceSize: 10
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
 --- !u!4 &756628171
 Transform:
@@ -434,7 +434,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 80
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -484,7 +484,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1912272152
 MonoBehaviour:
   m_ObjectHideFlags: 0
