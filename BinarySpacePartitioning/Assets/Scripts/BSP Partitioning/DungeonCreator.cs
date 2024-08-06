@@ -10,7 +10,9 @@ public class DungeonCreator : MonoBehaviour
     public int dungeonWidth, dungeonHeight;
     public int roomWidthMin, roomHeightMin;
     public int maxIterations;
+
     public int entranceSize; //문 너비
+    public int entranceNum; //문 개수
    
     public Material material; // For Visualizing
 
@@ -107,7 +109,7 @@ public class DungeonCreator : MonoBehaviour
 
     }
 
-    void CreateDoor()
+   /* void CreateDoor()
     {
         
         List<Vector2Int> roomVertexes=new List<Vector2Int>();
@@ -217,7 +219,7 @@ public class DungeonCreator : MonoBehaviour
         }
 
 
-    }
+    }*/
 
     void CreateEntrance()
     {
@@ -250,70 +252,158 @@ public class DungeonCreator : MonoBehaviour
 
     void GenerateEntracne(RoomNode room, List<Vector2Int> roomVertexes)
     {
-        Vector2Int doorCoordinate;
+        Vector2Int doorCoordinate=Vector2Int.zero;
         Wall line = room.GetDivideLine();
 
-        //각 분할선마다 한 개의 출입구 만들기
-        if (line.DoorNum() >0)
+        //각 분할선마다 entranceNum 만큼의 출입구 만들기
+        if (line.DoorNum() > entranceNum)
             return;
 
             if (line.Orientation == Orientation.Horizontal)
             {
-                doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);
-                foreach (var roomVertex in roomVertexes)
+          
+                bool overlap=true;
+                while (overlap)
                 {
-                    while ((doorCoordinate.x <= roomVertex.x && doorCoordinate.y == roomVertex.y) && (roomVertex.x <= doorCoordinate.x + entranceSize && doorCoordinate.y == roomVertex.y)) //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
-                    {
-                        doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);  //재생성
-                    }
+                    doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);
 
+                    foreach (var roomVertex in roomVertexes)
+                    {
+                        overlap = false;
+
+                        //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                        if(IsOnVertex(doorCoordinate, roomVertex, Orientation.Horizontal)) 
+                        {
+                            overlap = true;
+                            break;
+                        }
+                        else
+                        {
+                            foreach(var doorPos in room.GetDivideLine().GetDoorList())
+                            {
+                                //문이 겹치지 않도록 생성
+                                if(IsDoorOverlap(doorCoordinate, doorPos, Orientation.Horizontal))
+                                {
+                                    overlap = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
                 }
-            }
-            else
+        }
+        else
             {
-                doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));
-                foreach (var roomVertex in roomVertexes)
+      
+                bool overlap = true;
+                while (overlap)
                 {
-                    while ((doorCoordinate.y <= roomVertex.y && doorCoordinate.x == roomVertex.x) && (roomVertex.y <= doorCoordinate.y + entranceSize && doorCoordinate.x == roomVertex.x)) //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
+                    doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));
+
+                    foreach (var roomVertex in roomVertexes)
                     {
-                        doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));  //재생성
+                        overlap = false;
+
+                        //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                        if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Vertical)) 
+                        {
+                            overlap = true;
+                            break;
+                        }
+                        else
+                        {
+                            foreach (var doorPos in room.GetDivideLine().GetDoorList())
+                            {
+                                //문이 겹치지 않도록 생성
+                                if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Vertical))
+                                {
+                                    overlap = true;
+                                    break;
+                                }
+
+                            }
+                        }
                     }
-
                 }
-            }
-            line.AddDoor(doorCoordinate);
-
-            //OutLine
-            GameObject door = new GameObject("Door");
-
-            door.transform.position = Vector3.zero;
-            door.transform.localScale = Vector3.one;
-
-
-            LineRenderer lineDoor = door.AddComponent<LineRenderer>();
-            lineDoor.positionCount = 2;
-            lineDoor.startColor = Color.green;
-            lineDoor.endColor = Color.green;
-            lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-            lineDoor.sortingOrder = 1;
-
-            lineDoor.enabled = false;
-
-            if (line.Orientation == Orientation.Horizontal)
-            {
-                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
-            }
-            else
-            {
-                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
-            }
-
-
-            lineDoor.enabled = true;
         }
 
-    
+            line.AddDoor(doorCoordinate);
+
+            //구분선 그리기
+            DrawLine(line, doorCoordinate);
+        }
+
+    void DrawLine(Wall line, Vector2Int doorCoordinate)
+    {
+        //OutLine
+        GameObject door = new GameObject("Door");
+
+        door.transform.position = Vector3.zero;
+        door.transform.localScale = Vector3.one;
+
+
+        LineRenderer lineDoor = door.AddComponent<LineRenderer>();
+        lineDoor.positionCount = 2;
+        lineDoor.startColor = Color.green;
+        lineDoor.endColor = Color.green;
+        lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+        lineDoor.sortingOrder = 1;
+
+        lineDoor.enabled = false;
+
+        if (line.Orientation == Orientation.Horizontal)
+        {
+            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
+        }
+        else
+        {
+            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
+        }
+
+
+        lineDoor.enabled = true;
+    }
+    bool IsDoorOverlap(Vector2Int newDoor, Vector2Int otherDoor, Orientation ori)
+    {
+        bool overlap = false;
+
+        if(ori == Orientation.Horizontal)
+        {
+            if ((newDoor.x <= otherDoor.x && newDoor.y == otherDoor.y) && (otherDoor.x <= newDoor.x + entranceSize && newDoor.y == otherDoor.y))
+                overlap = true;
+            else if ((newDoor.x >= otherDoor.x && newDoor.y == otherDoor.y) && (newDoor.x <= otherDoor.x + entranceSize && newDoor.y == otherDoor.y))
+                overlap = true;
+        }
+        else
+        {
+            if ((newDoor.y <= otherDoor.y && newDoor.x == otherDoor.x) && (otherDoor.y <= newDoor.y + entranceSize && newDoor.x == otherDoor.x))
+                overlap = true;
+            else if ((newDoor.y >= otherDoor.y && newDoor.x == otherDoor.x) && (newDoor.y <= otherDoor.y + entranceSize && newDoor.x == otherDoor.x))
+                overlap = true;
+        }
+
+        return overlap;
+    }
+
+    bool IsOnVertex(Vector2Int newDoor, Vector2Int vertex, Orientation ori)
+    {
+        bool onVertex = false;
+        if(ori== Orientation.Horizontal)
+        {
+            if((newDoor.x <= vertex.x && newDoor.y == vertex.y) && (vertex.x <= newDoor.x + entranceSize && newDoor.y == vertex.y))
+                    onVertex = true;
+        }
+        else
+        {
+            if ((newDoor.y <= vertex.y && newDoor.x == vertex.x) && (vertex.y <= newDoor.y + entranceSize && newDoor.x == vertex.x))
+                onVertex = true;
+        }
+
+        return onVertex;
+    }
+
 
 }

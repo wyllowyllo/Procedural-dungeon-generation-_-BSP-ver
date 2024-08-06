@@ -27,17 +27,14 @@ public class Wall
     {
         doorPos.Add(doorPosition);
     }
+    public List<Vector2Int> GetDoorList()
+    {
+        return doorPos;
+    }
     public int DoorNum()
     {
         return doorPos.Count;
     }
 
-    public bool sameWall(Wall wall)
-    {
-        if(this.orientation==wall.orientation)
-            if(this.leftVertex==wall.leftVertex && this.rightVertex==wall.rightVertex) 
-                return true;
-
-        return false;
-    }
+   
 }
