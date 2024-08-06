@@ -39,6 +39,7 @@ public class DungeonCreator : MonoBehaviour
        
 
 
+        //바닥타일 깔고 구분선 만들기
         for (int i = 0; i < listOfRooms.Count; i++) 
         {
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
@@ -119,33 +120,51 @@ public class DungeonCreator : MonoBehaviour
             roomVertexes.Add(room.TopLeftAreaCorner);
             roomVertexes.Add(room.TopRightAreaCorner);
         }
+
+        List<Wall> checkWalls = new List<Wall>();
+
         //각 방의 4 벽마다 문 생성
         foreach (var room in listOfRooms)
         {
-            GenerateDoor(room, roomVertexes);
+            GenerateDoor(room, roomVertexes, checkWalls);
         }
 
 
     }
 
-    void GenerateDoor(RoomNode room, List<Vector2Int> roomVertexes)
+    void GenerateDoor(RoomNode room, List<Vector2Int> roomVertexes, List<Wall> checkWalls)
     {
         Vector2Int doorCoordinate;
-       
+        
+        bool isSame;
     
         foreach (var wall in room.WallList)
         {
-            if (wall.DoorNum()!=0)
-                return;
+            isSame = false;
+
+            //이미 문이 생성된 벽이면, 또 생성하지 않음
+           foreach(var checkWall in checkWalls)
+            {
+                if (checkWall.sameWall(wall))
+                {
+                    isSame = true;
+                    break;
+                }
+                    
+            }
+
+            if (isSame)
+                continue;
 
             if (wall.Orientation == Orientation.Horizontal)
             {
                 doorCoordinate=new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x-entranceSize), wall.LeftVertex.y);
                 foreach(var roomVertex in roomVertexes)
                 {
-                    while((doorCoordinate.x<= roomVertex.x && doorCoordinate.y==roomVertex.y) && (roomVertex.x <= doorCoordinate.x + entranceSize && doorCoordinate.y == roomVertex.y)) //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
+                    //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                    while ((doorCoordinate.x<= roomVertex.x && doorCoordinate.y==roomVertex.y) && (roomVertex.x <= doorCoordinate.x + entranceSize && doorCoordinate.y == roomVertex.y)) 
                     {
-                        doorCoordinate = new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x - entranceSize), wall.LeftVertex.y);  //재생성
+                        doorCoordinate = new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x - entranceSize), wall.LeftVertex.y);  
                     }
 
                 }
@@ -155,14 +174,16 @@ public class DungeonCreator : MonoBehaviour
                 doorCoordinate = new Vector2Int(wall.LeftVertex.x,Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));
                 foreach (var roomVertex in roomVertexes)
                 {
-                    while ((doorCoordinate.y <= roomVertex.y && doorCoordinate.x==roomVertex.x) && (roomVertex.y <= doorCoordinate.y + entranceSize && doorCoordinate.x == roomVertex.x)) //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우
+                    //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                    while ((doorCoordinate.y <= roomVertex.y && doorCoordinate.x==roomVertex.x) && (roomVertex.y <= doorCoordinate.y + entranceSize && doorCoordinate.x == roomVertex.x)) 
                     {
-                        doorCoordinate = new Vector2Int(wall.LeftVertex.x, Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));  //재생성
+                        doorCoordinate = new Vector2Int(wall.LeftVertex.x, Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));  
                     }
 
                 }
             }
             wall.AddDoor(doorCoordinate);
+            checkWalls.Add(wall);
 
             //OutLine
             GameObject door = new GameObject("Door");
@@ -211,18 +232,19 @@ public class DungeonCreator : MonoBehaviour
             roomVertexes.Add(room.TopRightAreaCorner);
         }
 
-        RoomNode parent;
-        RoomNode prevNode=null;
-
+        RoomNode currentNode;
+      
         foreach (var room in listOfRooms)
         {
-            //리프노드의 부모노드 찾아서, 분할선에 출입구 만들기
-            parent=room.Parent;
+            currentNode = room.Parent;
 
-            if(prevNode!=parent)
-                GenerateEntracne(parent, roomVertexes);
+            while(currentNode != Ground)
+            {
+                GenerateEntracne(currentNode, roomVertexes);
+                currentNode=currentNode.Parent;
+            }
 
-            prevNode = parent;
+         
         }
     }
 
@@ -230,6 +252,10 @@ public class DungeonCreator : MonoBehaviour
     {
         Vector2Int doorCoordinate;
         Wall line = room.GetDivideLine();
+
+        //각 분할선마다 한 개의 출입구 만들기
+        if (line.DoorNum() >0)
+            return;
 
             if (line.Orientation == Orientation.Horizontal)
             {

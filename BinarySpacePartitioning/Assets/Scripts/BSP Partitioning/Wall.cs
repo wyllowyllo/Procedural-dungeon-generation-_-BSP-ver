@@ -32,4 +32,12 @@ public class Wall
         return doorPos.Count;
     }
 
+    public bool sameWall(Wall wall)
+    {
+        if(this.orientation==wall.orientation)
+            if(this.leftVertex==wall.leftVertex && this.rightVertex==wall.rightVertex) 
+                return true;
+
+        return false;
+    }
 }

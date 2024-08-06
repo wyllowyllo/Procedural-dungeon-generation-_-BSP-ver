@@ -249,9 +249,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonWidth: 200
   dungeonHeight: 200
-  roomWidthMin: 40
-  roomHeightMin: 30
-  maxIterations: 10
+  roomWidthMin: 25
+  roomHeightMin: 25
+  maxIterations: 20
   entranceSize: 10
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
 --- !u!4 &756628171
