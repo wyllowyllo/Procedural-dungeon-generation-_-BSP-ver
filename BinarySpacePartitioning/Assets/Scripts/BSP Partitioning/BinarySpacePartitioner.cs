@@ -9,31 +9,48 @@ public class BinarySpacePartitioner
     private int dungeonHeight;
 
     public RoomNode RootNode { get => rootNode; }
-    public BinarySpacePartitioner(int dungeonWidth, int dungeonHeight)
+    public BinarySpacePartitioner(Vector2Int startPoint,int dungeonWidth, int dungeonHeight)
     {
-        this.rootNode = new RoomNode(new Vector2Int(0, 0), new Vector2Int(dungeonWidth, dungeonHeight), null, 0);
+        this.rootNode = new RoomNode(startPoint, new Vector2Int(startPoint.x+dungeonWidth, startPoint.y+dungeonHeight), null, 0);
     }
 
-    public List<RoomNode> PrepareNodesCollection(int maxIterations, int roomWidthMin, int roomHeightMin)
+    public List<RoomNode> PrepareNodesCollection(int maxIterations, int roomWidthMin, int roomHeightMin, PUBLICSPACE type)
     {
         Queue<RoomNode> graph= new Queue<RoomNode>();
         List<RoomNode> listToReturn = new List<RoomNode>();
         graph.Enqueue(rootNode); //순차 방문하여 Split하기 위함
         listToReturn.Add(rootNode); //전체 Room Tree
 
-        int i = 0;
-
-        // maxIterations으로 분할 수(트리높이) 조정 
-        while (i < maxIterations && graph.Count > 0)
+        if(type==PUBLICSPACE.none)
         {
-            i++;
-            RoomNode currentNode= graph.Dequeue();
-            if (currentNode.Width >= roomWidthMin * 2 || currentNode.Height >= roomHeightMin * 2) 
-            {
-                SplitSpace(currentNode, listToReturn, roomWidthMin, roomHeightMin, graph);
-            }
+            int i = 0;
 
+            // maxIterations으로 분할 수(트리높이) 조정 
+            while (i < maxIterations && graph.Count > 0)
+            {
+                i++;
+                RoomNode currentNode = graph.Dequeue();
+                if (currentNode.Width >= roomWidthMin * 2 || currentNode.Height >= roomHeightMin * 2)
+                {
+                    SplitSpace(currentNode, listToReturn, roomWidthMin, roomHeightMin, graph);
+                }
+
+            }
         }
+
+        else
+        {
+            while (graph.Count > 0)
+            {
+                RoomNode currentNode = graph.Dequeue();
+                if (currentNode.Width >= roomWidthMin * 2 || currentNode.Height >= roomHeightMin * 2)
+                {
+                    SplitSpace(currentNode, listToReturn, roomWidthMin, roomHeightMin, graph);
+                }
+
+            }
+        }
+       
         return listToReturn;
     }
 

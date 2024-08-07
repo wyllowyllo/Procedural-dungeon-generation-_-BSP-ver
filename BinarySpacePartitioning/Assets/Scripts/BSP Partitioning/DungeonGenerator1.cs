@@ -15,16 +15,17 @@ internal class DungeonGenerator
         this.dungeonWidth = dungeonWidth;
         this.dungeonHeight = dungeonHeight;
     }
-    public List<RoomNode> CalculateRooms(int maxIterations, int roomWidthMin, int roomHeightMin)
+    public List<RoomNode> CalculateRooms(Vector2Int startPoint, int maxIterations, int roomWidthMin, int roomHeightMin, PUBLICSPACE type)
     {
-        BinarySpacePartitioner bsp = new BinarySpacePartitioner(dungeonWidth, dungeonHeight);
-        allSpaceNodes=bsp.PrepareNodesCollection(maxIterations, roomWidthMin, roomHeightMin); //트리를 구성하는 노드 전체 받아오기
+        BinarySpacePartitioner bsp = new BinarySpacePartitioner(startPoint,dungeonWidth, dungeonHeight);
+        allSpaceNodes=bsp.PrepareNodesCollection(maxIterations, roomWidthMin, roomHeightMin, type); //트리를 구성하는 노드 전체 받아오기
         RoomNode rootNode = allSpaceNodes[0];
 
         List<RoomNode> roomSpaces = FindLeafes(rootNode); //반환값은 리프노드 전체
 
         return roomSpaces;
     }
+   
 
     public List<RoomNode> FindLeafes(RoomNode parentNode)
     {

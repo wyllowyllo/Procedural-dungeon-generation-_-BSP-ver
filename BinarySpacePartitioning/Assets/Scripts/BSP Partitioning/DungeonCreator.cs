@@ -4,49 +4,153 @@ using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, middle, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
-    
-    public int dungeonWidth, dungeonHeight;
-    public int roomWidthMin, roomHeightMin;
-    public int maxIterations;
+    public PUBLICSPACE type;
+    public int dungeonWidth, dungeonHeight; //전체 그라운드 너비, 높이
+    public int publicSpaceWidth, publicSpaceHeight; //공용공간 너비, 높이 (type이 none이면 적용되지 않음)
+
+    public int roomWidthMin, roomHeightMin; //최소 방 크기
+    public int maxIterations; //최대 분할 횟수 - 트리 높이 제한, 이 값이 작을수록 비교적 큰 방이 만들어짐 (PublicSpace 타입이 none일 경우에만 적용)
 
     public int entranceSize; //문 너비
-    public int entranceNum; //문 개수
+    //public int entranceNum; //문 개수
    
     public Material material; // For Visualizing
 
     List<RoomNode> listOfRooms;
     RoomNode Ground;
-    
-   
 
-    // Start is called before the first frame update
+
+    private void Awake()
+    {
+        if (type == PUBLICSPACE.none)
+            return;
+
+        //최소 방 크기는 (전체 그라운드 크기 - 공용공간 크기) 보다 작아야 함
+        if(roomWidthMin > (dungeonWidth - publicSpaceWidth))
+        {
+            roomWidthMin = (dungeonWidth - publicSpaceWidth);
+            Debug.Log("방 최소너비가 (전체너비-공용공간 너비)보다 커서 roomWidthMin -> " + roomWidthMin + "으로 변경되었습니다");
+        }
+        if (roomHeightMin > (dungeonHeight - publicSpaceHeight))
+        {
+            roomHeightMin = (dungeonHeight - publicSpaceHeight);
+            Debug.Log("방 최소높이 (전체높이-공용공간 높이)보다 커서 roomHeightMin -> " + roomHeightMin + "으로 변경되었습니다");
+        }
+    }
+   
     void Start()
     {
         CreateDungeon();
-        //CreateDoor();
-        CreateEntrance();
+        //CreateEntrance();
     }
 
 
 
     public void CreateDungeon()
     {
-        DungeonGenerator generator = new DungeonGenerator(dungeonWidth,dungeonHeight);
-        listOfRooms = generator.CalculateRooms(maxIterations, roomWidthMin, roomHeightMin); //리프노드 리스트(실제 생성된 방 리스트)
+        switch (type)
+        {
+            case PUBLICSPACE.none:
+            default:
+               GenerateDungeon(new Vector2Int(0,0),dungeonWidth, dungeonHeight, type);
+                break;
+
+            case PUBLICSPACE.left_bottom:
+                List<RoomNode> rootList = SplitTheSpace(PUBLICSPACE.left_bottom);
+                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
+
+                //공용공간(0번 인덱스) 제외하고 분할 시작
+                for (int i = 1; i < rootList.Count; i++)
+                {
+                    RoomNode rootNode = rootList[i];
+                    GenerateDungeon(rootNode.BottomLeftAreaCorner,rootNode.Width, rootNode.Height, type);
+                }
+
+                break;
+
+            case PUBLICSPACE.right_bottom:
+                break;
+            case PUBLICSPACE.right_top:
+                break;
+            case PUBLICSPACE.left_top:
+                break;
+            case PUBLICSPACE.middle:
+                break;
+            case PUBLICSPACE.plaza:
+                break;
+        }
+      
+
+    }
+    private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
+    {
+        DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight);
+        listOfRooms = generator.CalculateRooms(startPoint,maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
 
         //전체 그라운드(루트 노드)
-        Ground = generator.GetRootNode(); 
-       
-
+        Ground = generator.GetRootNode();
 
         //바닥타일 깔고 구분선 만들기
-        for (int i = 0; i < listOfRooms.Count; i++) 
+        for (int i = 0; i < listOfRooms.Count; i++)
         {
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
         }
-      
+    }
+    private List<RoomNode> SplitTheSpace(PUBLICSPACE type)
+    {
+        Vector2Int referencePoint; //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표 또는 왼쪽 아래 모서리 좌표)
+        List<RoomNode> rootList=new List<RoomNode> ();
+
+
+        if(type == PUBLICSPACE.left_bottom)
+        {
+            referencePoint = new Vector2Int(publicSpaceWidth, publicSpaceHeight);
+
+            //공용공간
+            RoomNode node1 = new RoomNode(new Vector2Int(0,0), referencePoint
+                                , null
+                                , 0);
+          
+            //나머지 공간 분할
+            RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
+                               , null
+                               , 0);
+           
+            RoomNode node3 = new RoomNode(new Vector2Int(0, referencePoint.y), new Vector2Int(referencePoint.x, dungeonHeight)
+                                , null
+                                , 0);
+
+            rootList.Add(node1);
+            rootList.Add(node2);
+            rootList.Add(node3);
+        }
+        else if(type == PUBLICSPACE.right_bottom)
+        {
+
+        }
+        else if (type == PUBLICSPACE.right_top)
+        {
+
+        }
+        else if (type == PUBLICSPACE.left_top)
+        {
+
+        }
+        else if (type == PUBLICSPACE.middle)
+        {
+
+        }
+        else if (type == PUBLICSPACE.plaza)
+        {
+
+        }
+
+
+
+        return rootList;
     }
 
     void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
@@ -240,7 +344,7 @@ public class DungeonCreator : MonoBehaviour
         {
             currentNode = room.Parent;
 
-            while(currentNode != Ground)
+            while(currentNode.Parent!=null)
             {
                 GenerateEntracne(currentNode, roomVertexes);
                 currentNode=currentNode.Parent;
@@ -255,8 +359,8 @@ public class DungeonCreator : MonoBehaviour
         Vector2Int doorCoordinate=Vector2Int.zero;
         Wall line = room.GetDivideLine();
 
-        //각 분할선마다 entranceNum 만큼의 출입구 만들기
-        if (line.DoorNum() > entranceNum)
+        //각 분할선마다 1개의 출입구 만들기
+        if (line.DoorNum() !=0)
             return;
 
             if (line.Orientation == Orientation.Horizontal)
