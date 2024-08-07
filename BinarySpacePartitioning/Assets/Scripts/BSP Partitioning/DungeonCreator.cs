@@ -20,7 +20,7 @@ public class DungeonCreator : MonoBehaviour
    
     public Material material; // For Visualizing
 
-    List<RoomNode> listOfRooms;
+    List<RoomNode> listOfRooms=new List<RoomNode>();
     RoomNode Ground;
 
 
@@ -45,7 +45,7 @@ public class DungeonCreator : MonoBehaviour
     void Start()
     {
         CreateDungeon();
-        //CreateEntrance();
+        CreateEntrance();
     }
 
 
@@ -61,58 +61,24 @@ public class DungeonCreator : MonoBehaviour
                 break;
 
             case PUBLICSPACE.left_bottom:
-                rootList = SplitTheSpace(PUBLICSPACE.left_bottom);
-                //listOfRooms.Add(rootList[0]);
-                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
-
+            case PUBLICSPACE.right_bottom:
+            case PUBLICSPACE.right_top:
+            case PUBLICSPACE.left_top:
+                rootList = SplitTheSpace(type);
+                listOfRooms.Add(rootList[0]);
+               
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
                 {
                     RoomNode rootNode = rootList[i];
                     GenerateDungeon(rootNode.BottomLeftAreaCorner,rootNode.Width, rootNode.Height, type);
                 }
-                
+
+                Visualize();
                 break;
 
-            case PUBLICSPACE.right_bottom:
-                rootList = SplitTheSpace(PUBLICSPACE.right_bottom);
-                //listOfRooms.Add(rootList[0]);
-                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
-
-                //공용공간(0번 인덱스) 제외하고 분할 시작
-                for (int i = 1; i < rootList.Count; i++)
-                {
-                    RoomNode rootNode = rootList[i];
-                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
-                }
-                
-                break;
-            case PUBLICSPACE.right_top:
-                rootList = SplitTheSpace(PUBLICSPACE.right_top);
-                //listOfRooms.Add(rootList[0]);
-                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
-
-                //공용공간(0번 인덱스) 제외하고 분할 시작
-                for (int i = 1; i < rootList.Count; i++)
-                {
-                    RoomNode rootNode = rootList[i];
-                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
-                }
-                
-                break;
-            case PUBLICSPACE.left_top:
-                rootList = SplitTheSpace(PUBLICSPACE.left_top);
-                //listOfRooms.Add(rootList[0]);
-                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
-
-                //공용공간(0번 인덱스) 제외하고 분할 시작
-                for (int i = 1; i < rootList.Count; i++)
-                {
-                    RoomNode rootNode = rootList[i];
-                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
-                }
+           
                
-                break;
             case PUBLICSPACE.middle:
                 break;
             case PUBLICSPACE.plaza:
@@ -124,16 +90,24 @@ public class DungeonCreator : MonoBehaviour
     private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
     {
         DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight);
-        listOfRooms = generator.CalculateRooms(startPoint, maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
+        List<RoomNode> leafList = generator.CalculateRooms(startPoint, maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
 
-        //전체 그라운드(루트 노드)
-        Ground = generator.GetRootNode();
+      
 
-        //바닥타일 깔고 구분선 만들기
-        for (int i = 0; i < listOfRooms.Count; i++)
+        if(type==PUBLICSPACE.none)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
+           
+            Ground = generator.GetRootNode();  //전체 그라운드(루트 노드)
+            listOfRooms = leafList;
+            //바닥타일 깔고 구분선 만들기
+            Visualize();
         }
+        else
+        {
+            foreach(var leaf in leafList)
+                listOfRooms.Add(leaf);
+        }
+       
     }
     
     private List<RoomNode> SplitTheSpace(PUBLICSPACE type)
@@ -244,6 +218,14 @@ public class DungeonCreator : MonoBehaviour
         return rootList;
     }
 
+    void Visualize()
+    {
+        for (int i = 0; i < listOfRooms.Count; i++)
+        {
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
+        }
+    }
+
     void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
     {
         Vector3 bottomLeftV = new Vector3(bottomLeftCorner.x, 0, bottomLeftCorner.y);
@@ -321,6 +303,9 @@ public class DungeonCreator : MonoBehaviour
       
         foreach (var room in listOfRooms)
         {
+            if (room.Parent == null)
+                continue;
+
             currentNode = room.Parent;
 
             while(currentNode.Parent!=null)
