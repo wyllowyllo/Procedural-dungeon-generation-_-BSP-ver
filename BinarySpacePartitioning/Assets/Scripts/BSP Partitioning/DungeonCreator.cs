@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +16,7 @@ public class DungeonCreator : MonoBehaviour
     public int maxIterations; //최대 분할 횟수 - 트리 높이 제한, 이 값이 작을수록 비교적 큰 방이 만들어짐 (PublicSpace 타입이 none일 경우에만 적용)
 
     public int entranceSize; //문 너비
-    //public int entranceNum; //문 개수
+   
    
     public Material material; // For Visualizing
 
@@ -51,6 +52,7 @@ public class DungeonCreator : MonoBehaviour
 
     public void CreateDungeon()
     {
+        List<RoomNode> rootList;
         switch (type)
         {
             case PUBLICSPACE.none:
@@ -59,7 +61,8 @@ public class DungeonCreator : MonoBehaviour
                 break;
 
             case PUBLICSPACE.left_bottom:
-                List<RoomNode> rootList = SplitTheSpace(PUBLICSPACE.left_bottom);
+                rootList = SplitTheSpace(PUBLICSPACE.left_bottom);
+                //listOfRooms.Add(rootList[0]);
                 CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
@@ -68,14 +71,47 @@ public class DungeonCreator : MonoBehaviour
                     RoomNode rootNode = rootList[i];
                     GenerateDungeon(rootNode.BottomLeftAreaCorner,rootNode.Width, rootNode.Height, type);
                 }
-
+                
                 break;
 
             case PUBLICSPACE.right_bottom:
+                rootList = SplitTheSpace(PUBLICSPACE.right_bottom);
+                //listOfRooms.Add(rootList[0]);
+                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
+
+                //공용공간(0번 인덱스) 제외하고 분할 시작
+                for (int i = 1; i < rootList.Count; i++)
+                {
+                    RoomNode rootNode = rootList[i];
+                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
+                }
+                
                 break;
             case PUBLICSPACE.right_top:
+                rootList = SplitTheSpace(PUBLICSPACE.right_top);
+                //listOfRooms.Add(rootList[0]);
+                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
+
+                //공용공간(0번 인덱스) 제외하고 분할 시작
+                for (int i = 1; i < rootList.Count; i++)
+                {
+                    RoomNode rootNode = rootList[i];
+                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
+                }
+                
                 break;
             case PUBLICSPACE.left_top:
+                rootList = SplitTheSpace(PUBLICSPACE.left_top);
+                //listOfRooms.Add(rootList[0]);
+                CreateMesh(rootList[0].BottomLeftAreaCorner, rootList[0].TopRightAreaCorner);
+
+                //공용공간(0번 인덱스) 제외하고 분할 시작
+                for (int i = 1; i < rootList.Count; i++)
+                {
+                    RoomNode rootNode = rootList[i];
+                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
+                }
+               
                 break;
             case PUBLICSPACE.middle:
                 break;
@@ -88,7 +124,7 @@ public class DungeonCreator : MonoBehaviour
     private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
     {
         DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight);
-        listOfRooms = generator.CalculateRooms(startPoint,maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
+        listOfRooms = generator.CalculateRooms(startPoint, maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
 
         //전체 그라운드(루트 노드)
         Ground = generator.GetRootNode();
@@ -99,6 +135,7 @@ public class DungeonCreator : MonoBehaviour
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
         }
     }
+    
     private List<RoomNode> SplitTheSpace(PUBLICSPACE type)
     {
         Vector2Int referencePoint; //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표 또는 왼쪽 아래 모서리 좌표)
@@ -129,15 +166,69 @@ public class DungeonCreator : MonoBehaviour
         }
         else if(type == PUBLICSPACE.right_bottom)
         {
+            referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, 0);
 
+            //공용공간
+            RoomNode node1 = new RoomNode(referencePoint, new Vector2Int(referencePoint.x+publicSpaceWidth,referencePoint.y+publicSpaceHeight)
+                                , null
+                                , 0);
+
+            //나머지 공간 분할
+            RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
+                               , null
+                               , 0);
+
+            RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, referencePoint.y+publicSpaceHeight), new Vector2Int(referencePoint.x + publicSpaceWidth, dungeonHeight)
+                                , null
+                                , 0);
+
+            rootList.Add(node1);
+            rootList.Add(node2);
+            rootList.Add(node3);
         }
         else if (type == PUBLICSPACE.right_top)
         {
+            referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, dungeonHeight-publicSpaceHeight);
 
+            //공용공간
+            RoomNode node1 = new RoomNode(referencePoint, new Vector2Int(referencePoint.x+publicSpaceWidth, referencePoint.y + publicSpaceHeight)
+                                , null
+                                , 0);
+
+            //나머지 공간 분할
+            RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
+                               , null
+                               , 0);
+
+            RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, referencePoint.y)
+                                , null
+                                , 0);
+
+            rootList.Add(node1);
+            rootList.Add(node2);
+            rootList.Add(node3);
         }
         else if (type == PUBLICSPACE.left_top)
         {
+            referencePoint = new Vector2Int(publicSpaceWidth, dungeonHeight);
 
+            //공용공간
+            RoomNode node1 = new RoomNode(new Vector2Int(0,referencePoint.y-publicSpaceHeight), referencePoint
+                                , null
+                                , 0);
+
+            //나머지 공간 분할
+            RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
+                               , null
+                               , 0);
+
+            RoomNode node3 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, referencePoint.y-publicSpaceHeight)
+                                , null
+                                , 0);
+
+            rootList.Add(node1);
+            rootList.Add(node2);
+            rootList.Add(node3);
         }
         else if (type == PUBLICSPACE.middle)
         {
@@ -212,118 +303,6 @@ public class DungeonCreator : MonoBehaviour
         line.enabled = true;
 
     }
-
-   /* void CreateDoor()
-    {
-        
-        List<Vector2Int> roomVertexes=new List<Vector2Int>();
-
-        //모든 방 꼭짓점 리스트 만들기
-        foreach (var room in listOfRooms)
-        {
-            roomVertexes.Add(room.BottomLeftAreaCorner);
-            roomVertexes.Add(room.BottomRightAreaCorner);
-            roomVertexes.Add(room.TopLeftAreaCorner);
-            roomVertexes.Add(room.TopRightAreaCorner);
-        }
-
-        List<Wall> checkWalls = new List<Wall>();
-
-        //각 방의 4 벽마다 문 생성
-        foreach (var room in listOfRooms)
-        {
-            GenerateDoor(room, roomVertexes, checkWalls);
-        }
-
-
-    }
-
-    void GenerateDoor(RoomNode room, List<Vector2Int> roomVertexes, List<Wall> checkWalls)
-    {
-        Vector2Int doorCoordinate;
-        
-        bool isSame;
-    
-        foreach (var wall in room.WallList)
-        {
-            isSame = false;
-
-            //이미 문이 생성된 벽이면, 또 생성하지 않음
-           foreach(var checkWall in checkWalls)
-            {
-                if (checkWall.sameWall(wall))
-                {
-                    isSame = true;
-                    break;
-                }
-                    
-            }
-
-            if (isSame)
-                continue;
-
-            if (wall.Orientation == Orientation.Horizontal)
-            {
-                doorCoordinate=new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x-entranceSize), wall.LeftVertex.y);
-                foreach(var roomVertex in roomVertexes)
-                {
-                    //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    while ((doorCoordinate.x<= roomVertex.x && doorCoordinate.y==roomVertex.y) && (roomVertex.x <= doorCoordinate.x + entranceSize && doorCoordinate.y == roomVertex.y)) 
-                    {
-                        doorCoordinate = new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x - entranceSize), wall.LeftVertex.y);  
-                    }
-
-                }
-            }
-            else
-            {
-                doorCoordinate = new Vector2Int(wall.LeftVertex.x,Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));
-                foreach (var roomVertex in roomVertexes)
-                {
-                    //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    while ((doorCoordinate.y <= roomVertex.y && doorCoordinate.x==roomVertex.x) && (roomVertex.y <= doorCoordinate.y + entranceSize && doorCoordinate.x == roomVertex.x)) 
-                    {
-                        doorCoordinate = new Vector2Int(wall.LeftVertex.x, Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));  
-                    }
-
-                }
-            }
-            wall.AddDoor(doorCoordinate);
-            checkWalls.Add(wall);
-
-            //OutLine
-            GameObject door = new GameObject("Door");
-
-            door.transform.position = Vector3.zero;
-            door.transform.localScale = Vector3.one;
-           
-
-            LineRenderer lineDoor = door.AddComponent<LineRenderer>();
-            lineDoor.positionCount = 2;
-            lineDoor.startColor = Color.green;
-            lineDoor.endColor = Color.green;
-            lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-            lineDoor.sortingOrder = 1;
-
-            lineDoor.enabled = false;
-
-            if (wall.Orientation == Orientation.Horizontal)
-            {
-                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
-            }
-            else
-            {
-                lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-                lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
-            }
-
-
-            lineDoor.enabled = true;
-        }
-
-
-    }*/
 
     void CreateEntrance()
     {
