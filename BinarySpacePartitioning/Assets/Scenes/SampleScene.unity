@@ -250,10 +250,11 @@ MonoBehaviour:
   type: 4
   dungeonWidth: 200
   dungeonHeight: 200
-  publicSpaceWidth: 130
-  publicSpaceHeight: 130
   roomWidthMin: 30
   roomHeightMin: 35
+  publicSpaceWidth: 130
+  publicSpaceHeight: 130
+  publicSpaceDoorNumOnWall: 2
   maxIterations: 9
   entranceSize: 10
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}

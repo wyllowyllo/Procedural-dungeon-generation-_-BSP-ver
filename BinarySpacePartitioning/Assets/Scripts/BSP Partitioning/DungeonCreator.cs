@@ -10,9 +10,12 @@ public class DungeonCreator : MonoBehaviour
 {
     public PUBLICSPACE type;
     public int dungeonWidth, dungeonHeight; //전체 그라운드 너비, 높이
-    public int publicSpaceWidth, publicSpaceHeight; //공용공간 너비, 높이 (type이 none이면 적용되지 않음)
-
     public int roomWidthMin, roomHeightMin; //최소 방 크기
+
+    public int publicSpaceWidth, publicSpaceHeight; //공용공간 너비, 높이 (type이 none이면 적용되지 않음)
+    public int publicSpaceDoorNumOnWall; //공용공간의 벽면당 문 개수 (벽면당 최소 1개)
+
+    
     public int maxIterations; //최대 분할 횟수 - 트리 높이 제한, 이 값이 작을수록 비교적 큰 방이 만들어짐 (PublicSpace 타입이 none일 경우에만 적용)
 
     public int entranceSize; //문 너비
@@ -141,6 +144,8 @@ public class DungeonCreator : MonoBehaviour
         else if(type == PUBLICSPACE.right_bottom)
         {
             referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, 0);
+
+           
 
             //공용공간
             RoomNode node1 = new RoomNode(referencePoint, new Vector2Int(referencePoint.x+publicSpaceWidth,referencePoint.y+publicSpaceHeight)
@@ -310,15 +315,57 @@ public class DungeonCreator : MonoBehaviour
 
             while(currentNode.Parent!=null)
             {
-                GenerateEntracne(currentNode, roomVertexes);
+                GenerateEntrance(currentNode, roomVertexes);
                 currentNode=currentNode.Parent;
             }
 
          
         }
+
+        //공용공간이 있을 경우 공용공간에 통로 따로 생성
+        if(type!=PUBLICSPACE.none)
+        {
+            RoomNode publicSpaceNode=listOfRooms[0];
+           
+            switch(type)
+            {
+                //왼쪽 아래 코너에 공용공간이 있을 경우, 해당 공간의 오른쪽, 위쪽 벽면에 통로 생성
+                case PUBLICSPACE.left_bottom:
+
+                    while(publicSpaceNode.WallList[1].DoorNum()<publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[1], roomVertexes);
+                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[3], roomVertexes);
+                    break;
+
+                //오른쪽 아래 코너에 공용공간이 있을 경우, 해당 공간의 왼쪽, 위쪽 벽면에 통로 생성
+                case PUBLICSPACE.right_bottom:
+                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[0], roomVertexes);
+                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[3], roomVertexes);
+                    break;
+
+                //오른쪽 위 코너에 공용공간이 있을 경우, 해당 공간의 왼쪽, 아래쪽 벽면에 통로 생성
+                case PUBLICSPACE.right_top:
+                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[0], roomVertexes);
+                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[2], roomVertexes);
+                    break;
+
+                //왼쪽 위 코너에 공용공간이 있을 경우, 해당 공간의 아래쪽, 오른쪽 벽면에 통로 생성
+                case PUBLICSPACE.left_top:
+                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[2], roomVertexes);
+                    while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[1], roomVertexes);
+                    break;
+            }
+        }
     }
 
-    void GenerateEntracne(RoomNode room, List<Vector2Int> roomVertexes)
+    void GenerateEntrance(RoomNode room, List<Vector2Int> roomVertexes)
     {
         Vector2Int doorCoordinate=Vector2Int.zero;
         Wall line = room.GetDivideLine();
@@ -401,6 +448,87 @@ public class DungeonCreator : MonoBehaviour
             //구분선 그리기
             DrawLine(line, doorCoordinate);
         }
+    void GenerateEntrance(Wall wall, List<Vector2Int> roomVertexes)
+    {
+        Vector2Int doorCoordinate = Vector2Int.zero;
+       
+
+       
+
+        if (wall.Orientation == Orientation.Horizontal)
+        {
+
+            bool overlap = true;
+            while (overlap)
+            {
+                doorCoordinate = new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x - entranceSize), wall.LeftVertex.y);
+
+                foreach (var roomVertex in roomVertexes)
+                {
+                    overlap = false;
+
+                    //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Horizontal))
+                    {
+                        overlap = true;
+                        break;
+                    }
+                    else
+                    {
+                        foreach (var doorPos in wall.GetDoorList())
+                        {
+                            //문이 겹치지 않도록 생성
+                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Horizontal))
+                            {
+                                overlap = true;
+                                break;
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+
+            bool overlap = true;
+            while (overlap)
+            {
+                doorCoordinate = new Vector2Int(wall.LeftVertex.x, Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));
+
+                foreach (var roomVertex in roomVertexes)
+                {
+                    overlap = false;
+
+                    //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
+                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Vertical))
+                    {
+                        overlap = true;
+                        break;
+                    }
+                    else
+                    {
+                        foreach (var doorPos in wall.GetDoorList())
+                        {
+                            //문이 겹치지 않도록 생성
+                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Vertical))
+                            {
+                                overlap = true;
+                                break;
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        wall.AddDoor(doorCoordinate);
+
+        //구분선 그리기
+        DrawLine(wall, doorCoordinate);
+    }
 
     void DrawLine(Wall line, Vector2Int doorCoordinate)
     {
