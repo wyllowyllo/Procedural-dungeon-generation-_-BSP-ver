@@ -48,7 +48,7 @@ public class DungeonCreator : MonoBehaviour
     void Start()
     {
         CreateDungeon();
-        CreateEntrance();
+        //CreateEntrance();
     }
 
 
@@ -83,6 +83,17 @@ public class DungeonCreator : MonoBehaviour
            
                
             case PUBLICSPACE.middle:
+                rootList = SplitTheSpace(type);
+                listOfRooms.Add(rootList[0]);
+
+                //공용공간(0번 인덱스) 제외하고 분할 시작
+                for (int i = 1; i < rootList.Count; i++)
+                {
+                    RoomNode rootNode = rootList[i];
+                    GenerateDungeon(rootNode.BottomLeftAreaCorner, rootNode.Width, rootNode.Height, type);
+                }
+
+                Visualize();
                 break;
             case PUBLICSPACE.plaza:
                 break;
@@ -243,15 +254,37 @@ public class DungeonCreator : MonoBehaviour
             RoomNode node1 = new RoomNode(leftBottomPoint, rightTopPoint
                                 , null
                                 , 0);
+            rootList.Add(node1);
 
-            /*//나머지 공간 분할
-            RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
-                               , null
-                               , 0);
-
-            RoomNode node3 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, referencePoint.y - publicSpaceHeight)
-                                , null
-                                , 0);*/
+            //나머지 공간 분할
+            if (leftBottomPoint.y > 0)
+            {
+                RoomNode node2 = new RoomNode(new Vector2Int(leftBottomPoint.x, 0), new Vector2Int(rightTopPoint.x, leftBottomPoint.y)
+                             , null
+                             , 0);
+                rootList.Add(node2);
+            }
+            if (dungeonWidth - rightTopPoint.x > 0)
+            {
+                RoomNode node3 = new RoomNode(new Vector2Int(rightTopPoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
+                             , null
+                             , 0);
+                rootList.Add(node3);
+            }
+            if (dungeonHeight - rightTopPoint.y > 0)
+            {
+                RoomNode node4 = new RoomNode(new Vector2Int(leftBottomPoint.x, rightTopPoint.y), new Vector2Int(rightTopPoint.x, dungeonHeight)
+                             , null
+                             , 0);
+                rootList.Add(node4);
+            }
+            if (leftBottomPoint.x > 0)
+            {
+                RoomNode node5 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(leftBottomPoint.x, dungeonHeight)
+                             , null
+                             , 0);
+                rootList.Add(node5);
+            }
 
         }
         else if (type == PUBLICSPACE.plaza)

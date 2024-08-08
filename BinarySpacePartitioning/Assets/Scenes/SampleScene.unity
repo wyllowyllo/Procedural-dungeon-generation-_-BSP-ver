@@ -247,12 +247,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5790c0d49e46d4fb9e4fc6498a2ddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 4
+  type: 5
   dungeonWidth: 200
   dungeonHeight: 200
   roomWidthMin: 30
   roomHeightMin: 35
-  publicSpaceWidth: 200
+  publicSpaceWidth: 130
   publicSpaceHeight: 130
   publicSpaceDoorNumOnWall: 2
   maxIterations: 9
