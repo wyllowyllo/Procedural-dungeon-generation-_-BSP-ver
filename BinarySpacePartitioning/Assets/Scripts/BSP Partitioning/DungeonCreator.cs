@@ -5,7 +5,7 @@ using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, middle, plaza } //공용공간 생성 타입
+public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
     public PUBLICSPACE type;
@@ -48,7 +48,7 @@ public class DungeonCreator : MonoBehaviour
     void Start()
     {
         CreateDungeon();
-        //CreateEntrance();
+        CreateEntrance();
     }
 
 
@@ -81,8 +81,7 @@ public class DungeonCreator : MonoBehaviour
                 break;
 
            
-               
-            case PUBLICSPACE.middle:
+            case PUBLICSPACE.center:
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
 
@@ -244,7 +243,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList.Add(node3);
             }       
         }
-        else if (type == PUBLICSPACE.middle)
+        else if (type == PUBLICSPACE.center)
         {
             Vector2Int center = new Vector2Int(dungeonWidth / 2, dungeonHeight / 2); //그라운드 정중앙
             Vector2Int leftBottomPoint=new Vector2Int(center.x-(publicSpaceWidth/2), center.y-(publicSpaceHeight/2));
@@ -434,6 +433,18 @@ public class DungeonCreator : MonoBehaviour
                         GenerateEntrance(publicSpaceNode.WallList[2], roomVertexes);
                     while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
                         GenerateEntrance(publicSpaceNode.WallList[1], roomVertexes);
+                    break;
+
+                //중앙에 공용공간이 있을 경우, 해당 공간의 4벽면에 통로 생성
+                case PUBLICSPACE.center:
+                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[2], roomVertexes);
+                    while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[1], roomVertexes);
+                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[0], roomVertexes);
+                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
+                        GenerateEntrance(publicSpaceNode.WallList[3], roomVertexes);
                     break;
             }
         }
