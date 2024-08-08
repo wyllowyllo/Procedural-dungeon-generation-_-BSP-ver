@@ -252,7 +252,7 @@ MonoBehaviour:
   dungeonHeight: 200
   roomWidthMin: 30
   roomHeightMin: 35
-  publicSpaceWidth: 130
+  publicSpaceWidth: 200
   publicSpaceHeight: 130
   publicSpaceDoorNumOnWall: 2
   maxIterations: 9

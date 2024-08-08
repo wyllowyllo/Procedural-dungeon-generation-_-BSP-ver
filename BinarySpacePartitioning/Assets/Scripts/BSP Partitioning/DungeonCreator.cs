@@ -34,14 +34,14 @@ public class DungeonCreator : MonoBehaviour
 
         //최소 방 크기는 (전체 그라운드 크기 - 공용공간 크기) 보다 작아야 함
         if(roomWidthMin > (dungeonWidth - publicSpaceWidth))
-        {
-            roomWidthMin = (dungeonWidth - publicSpaceWidth);
-            Debug.Log("방 최소너비가 (전체너비-공용공간 너비)보다 커서 roomWidthMin -> " + roomWidthMin + "으로 변경되었습니다");
+        {           
+            publicSpaceWidth = dungeonWidth;
+            Debug.Log("방 최소너비가 (전체너비-공용공간 너비)보다 커서 publicSpaceWidth -> " + dungeonWidth + "으로 확장되었습니다");
         }
         if (roomHeightMin > (dungeonHeight - publicSpaceHeight))
-        {
-            roomHeightMin = (dungeonHeight - publicSpaceHeight);
-            Debug.Log("방 최소높이 (전체높이-공용공간 높이)보다 커서 roomHeightMin -> " + roomHeightMin + "으로 변경되었습니다");
+        {          
+            publicSpaceHeight = dungeonHeight;
+            Debug.Log("방 최소높이 (전체높이-공용공간 높이)보다 커서 publicSpaceHeight -> " + dungeonHeight + "으로 확장되었습니다");
         }
     }
    
@@ -115,102 +115,143 @@ public class DungeonCreator : MonoBehaviour
     
     private List<RoomNode> SplitTheSpace(PUBLICSPACE type)
     {
-        Vector2Int referencePoint; //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표 또는 왼쪽 아래 모서리 좌표)
+        //Vector2Int referencePoint; //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표 또는 왼쪽 아래 모서리 좌표)
         List<RoomNode> rootList=new List<RoomNode> ();
 
 
         if(type == PUBLICSPACE.left_bottom)
         {
-            referencePoint = new Vector2Int(publicSpaceWidth, publicSpaceHeight);
+            Vector2Int referencePoint = new Vector2Int(publicSpaceWidth, publicSpaceHeight); //기준점(왼쪽아래 방의 오른쪽 위 모서리 좌표)
 
             //공용공간
             RoomNode node1 = new RoomNode(new Vector2Int(0,0), referencePoint
                                 , null
                                 , 0);
-          
+            rootList.Add(node1);
+
             //나머지 공간 분할
-            RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
+            if (dungeonWidth-publicSpaceWidth>0)
+            {
+                RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
                                , null
                                , 0);
-           
-            RoomNode node3 = new RoomNode(new Vector2Int(0, referencePoint.y), new Vector2Int(referencePoint.x, dungeonHeight)
-                                , null
-                                , 0);
+                rootList.Add(node2);
+            }
 
-            rootList.Add(node1);
-            rootList.Add(node2);
-            rootList.Add(node3);
+            if (dungeonHeight - publicSpaceHeight > 0)
+            {
+                RoomNode node3 = new RoomNode(new Vector2Int(0, referencePoint.y), new Vector2Int(referencePoint.x, dungeonHeight)
+                              , null
+                              , 0);
+                rootList.Add(node3);
+            }
+           
+          
         }
         else if(type == PUBLICSPACE.right_bottom)
         {
-            referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, 0);
+            Vector2Int referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, 0); //기준점(오른쪽아래 방의 왼쪽 아래 모서리 좌표)
 
-           
+
 
             //공용공간
             RoomNode node1 = new RoomNode(referencePoint, new Vector2Int(referencePoint.x+publicSpaceWidth,referencePoint.y+publicSpaceHeight)
                                 , null
                                 , 0);
+            rootList.Add(node1);
 
             //나머지 공간 분할
-            RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
-                               , null
-                               , 0);
+            if (dungeonWidth - publicSpaceWidth > 0)
+            {
+                RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
+                              , null
+                              , 0);
+                rootList.Add(node2);
+            }
+            if (dungeonHeight - publicSpaceHeight > 0)
+            {
+                RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, referencePoint.y + publicSpaceHeight), new Vector2Int(referencePoint.x + publicSpaceWidth, dungeonHeight)
+                              , null
+                              , 0);
+                rootList.Add(node3);
+            }
 
-            RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, referencePoint.y+publicSpaceHeight), new Vector2Int(referencePoint.x + publicSpaceWidth, dungeonHeight)
-                                , null
-                                , 0);
-
-            rootList.Add(node1);
-            rootList.Add(node2);
-            rootList.Add(node3);
+          
         }
         else if (type == PUBLICSPACE.right_top)
         {
-            referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, dungeonHeight-publicSpaceHeight);
+            Vector2Int referencePoint = new Vector2Int(dungeonWidth-publicSpaceWidth, dungeonHeight-publicSpaceHeight); //기준점(오른쪽 위 방의 왼쪽아래 모서리 좌표)
 
             //공용공간
             RoomNode node1 = new RoomNode(referencePoint, new Vector2Int(referencePoint.x+publicSpaceWidth, referencePoint.y + publicSpaceHeight)
                                 , null
                                 , 0);
+            rootList.Add(node1);
 
             //나머지 공간 분할
-            RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
-                               , null
-                               , 0);
-
-            RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, referencePoint.y)
+            if (dungeonWidth - publicSpaceWidth > 0)
+            {
+                RoomNode node2 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, dungeonHeight)
+                              , null
+                              , 0);
+                rootList.Add(node2);
+            }
+               
+            if (dungeonHeight - publicSpaceHeight > 0)
+            {
+                RoomNode node3 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, referencePoint.y)
                                 , null
                                 , 0);
-
-            rootList.Add(node1);
-            rootList.Add(node2);
-            rootList.Add(node3);
+                rootList.Add(node3);
+            }
+                
         }
         else if (type == PUBLICSPACE.left_top)
         {
-            referencePoint = new Vector2Int(publicSpaceWidth, dungeonHeight);
+            Vector2Int referencePoint = new Vector2Int(publicSpaceWidth, dungeonHeight); //기준점(왼쪽 위 방의 오른쪽 위 모서리 좌표)
 
             //공용공간
             RoomNode node1 = new RoomNode(new Vector2Int(0,referencePoint.y-publicSpaceHeight), referencePoint
                                 , null
                                 , 0);
+            rootList.Add(node1);
 
             //나머지 공간 분할
+            if (dungeonWidth - publicSpaceWidth > 0)
+            {
+                RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
+                               , null
+                               , 0);
+                rootList.Add(node2);
+            }
+                
+            if (dungeonHeight - publicSpaceHeight > 0)
+            {
+                RoomNode node3 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, referencePoint.y - publicSpaceHeight)
+                                , null
+                                , 0);
+                rootList.Add(node3);
+            }       
+        }
+        else if (type == PUBLICSPACE.middle)
+        {
+            Vector2Int center = new Vector2Int(dungeonWidth / 2, dungeonHeight / 2); //그라운드 정중앙
+            Vector2Int leftBottomPoint=new Vector2Int(center.x-(publicSpaceWidth/2), center.y-(publicSpaceHeight/2));
+            Vector2Int rightTopPoint = new Vector2Int(center.x + (publicSpaceWidth / 2), center.y + (publicSpaceHeight / 2));
+
+            //공용공간
+            RoomNode node1 = new RoomNode(leftBottomPoint, rightTopPoint
+                                , null
+                                , 0);
+
+            /*//나머지 공간 분할
             RoomNode node2 = new RoomNode(new Vector2Int(referencePoint.x, 0), new Vector2Int(dungeonWidth, dungeonHeight)
                                , null
                                , 0);
 
-            RoomNode node3 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, referencePoint.y-publicSpaceHeight)
+            RoomNode node3 = new RoomNode(new Vector2Int(0, 0), new Vector2Int(referencePoint.x, referencePoint.y - publicSpaceHeight)
                                 , null
-                                , 0);
-
-            rootList.Add(node1);
-            rootList.Add(node2);
-            rootList.Add(node3);
-        }
-        else if (type == PUBLICSPACE.middle)
-        {
+                                , 0);*/
 
         }
         else if (type == PUBLICSPACE.plaza)
