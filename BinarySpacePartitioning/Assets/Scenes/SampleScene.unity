@@ -247,14 +247,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5790c0d49e46d4fb9e4fc6498a2ddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 5
+  type: 6
   dungeonWidth: 200
   dungeonHeight: 200
-  roomWidthMin: 30
+  roomWidthMin: 35
   roomHeightMin: 35
-  publicSpaceWidth: 130
-  publicSpaceHeight: 130
+  publicSpaceWidth: 150
+  publicSpaceHeight: 145
   publicSpaceDoorNumOnWall: 2
+  plazaRadius: 80
+  polygon: 14
   maxIterations: 9
   entranceSize: 10
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
