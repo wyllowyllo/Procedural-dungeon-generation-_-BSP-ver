@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Color = UnityEngine.Color;
+using System;
 
 public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
@@ -35,7 +36,9 @@ public class DungeonCreator : MonoBehaviour
     [Header("Plaza 타입 반지름")]
     [Tooltip("최대길이 = (그라운드 너비, 높이 중 작은 값의 절반)")]
     public int plazaRadius; //plaza 타입 공용공간 반지름 길이
+
     [Header("Plaza 타입 각 개수")]
+    [Range(3,20)]
     public int polygon; //정n각형, 값은 최소 3
 
     [Header("None 타입 최대분할 횟수")]
@@ -47,6 +50,12 @@ public class DungeonCreator : MonoBehaviour
    
    
     public Material material; // For Visualizing
+    public GameObject wallVertical, wallHorizontal;
+
+    List<Vector2Int> WallHorizontalPos; //가로 벽 좌표값 전체
+    List<Vector2Int> WallVerticalPos; // 세로 벽 좌표값 전체
+    List<Vector2Int> EntranceHorizontalCandidate; //방문 생성 가능한 가로 벽 좌표(방과 방이 공유하는 선)
+    List<Vector2Int> EntranceVerticalCandidate;//방문 생성 가능한 세로 벽 좌표(방과 방이 공유하는 선)
 
     List<RoomNode> listOfRooms=new List<RoomNode>();
     RoomNode Ground;
@@ -89,9 +98,27 @@ public class DungeonCreator : MonoBehaviour
     {
         CreateDungeon();
         CreateEntrance();
+        //VisualizeWall();
     }
 
+    private void VisualizeWall()
+    {
+       
 
+        //생성
+        /* foreach (var wallPosition in WallHorizontalPos)
+         {
+
+             Instantiate(wallHorizontal, wallPosition, Quaternion.identity);
+         }
+
+         foreach (var wallPosition in WallVerticalPos)
+         {
+
+             Instantiate(wallVertical, wallPosition, Quaternion.identity);
+         }*/
+
+    }
 
     public void CreateDungeon()
     {
@@ -148,8 +175,8 @@ public class DungeonCreator : MonoBehaviour
                 VisualizeForPlaza();
                 break;
         }
-      
 
+       
     }
 
     private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
@@ -490,6 +517,52 @@ public class DungeonCreator : MonoBehaviour
         line.enabled = true;
 
     }
+    void CreateWallPosList(RoomNode roomNode)
+    {
+        Vector2Int bottomLeftV = roomNode.BottomLeftAreaCorner;
+        Vector2Int bottomRightV = roomNode.BottomRightAreaCorner;
+        Vector2Int topLeftV = roomNode.TopLeftAreaCorner;
+        Vector2Int topRightV = roomNode.TopRightAreaCorner;
+      
+
+        for (int row = (int)bottomLeftV.x; row < (int)bottomRightV.x; row++)
+         {
+             var wallPosition = new Vector2Int(row, bottomLeftV.y);
+             AddWallPosToList(wallPosition, WallHorizontalPos, EntranceHorizontalCandidate);
+         }
+         for (int row = (int)topLeftV.x; row < (int)topRightV.x; row++)
+         {
+             var wallPosition = new Vector2Int(row, topLeftV.y);
+            AddWallPosToList(wallPosition, WallHorizontalPos, EntranceHorizontalCandidate);
+         }
+         for (int col = (int)bottomLeftV.y; col < (int)topLeftV.y; col++)
+         {
+             var wallPosition = new Vector2Int(bottomLeftV.x, col);
+            AddWallPosToList(wallPosition, WallVerticalPos,EntranceVerticalCandidate);
+         }
+         for (int col = (int)bottomRightV.y; col < (int)topRightV.y; col++)
+         {
+            var wallPosition = new Vector2Int(bottomRightV.x, col);
+            AddWallPosToList(wallPosition, WallVerticalPos, EntranceVerticalCandidate);
+         }
+
+    }
+    private void AddWallPosToList(Vector2Int wallPosition, List<Vector2Int> wallList, List<Vector2Int> doorCandidnate)
+    {
+        Vector2Int point=wallPosition;
+
+        if (wallList.Contains(point))
+        {
+            wallList.Remove(point);
+            doorCandidnate.Add(point);
+        }
+        else
+        {
+            wallList.Add(point);
+        }
+    }
+
+
     void CreateMeshForPlaza(Vector3[] vertices, int[] triangles)
     {
         Mesh mesh= new Mesh();
@@ -524,8 +597,21 @@ public class DungeonCreator : MonoBehaviour
 
     void CreateEntrance()
     {
+        WallHorizontalPos = new List<Vector2Int>();
+        WallVerticalPos = new List<Vector2Int>();
+        EntranceHorizontalCandidate = new List<Vector2Int>();
+        EntranceVerticalCandidate = new List<Vector2Int>();
+
+        //문 생성할 위치 좌표 리스트 만들기
+        foreach (var room in listOfRooms)
+            CreateWallPosList(room);
+
+      
+      
+
         EntranceGenerator entranceGenerator=new EntranceGenerator(listOfRooms,type, publicSpaceDoorNumOnWall, entranceSize);
-        
+        entranceGenerator.SetEntrancePossibleList(EntranceHorizontalCandidate, EntranceVerticalCandidate);
+        entranceGenerator.GenerateEntrance();
     }
 
     
@@ -541,7 +627,6 @@ public class DungeonCreator : MonoBehaviour
         entranceSize = (entranceSize >= roomWidthMin) ? 5 : entranceSize;
 
         plazaRadius = (dungeonWidth > dungeonHeight) ? Mathf.Clamp(plazaRadius, 5, dungeonHeight / 2) : Mathf.Clamp(plazaRadius, 5, dungeonWidth / 2);
-        polygon = (polygon < 3) ? 3 : polygon;
     }
 
 

@@ -17,6 +17,8 @@ public class DungeonCreatorEditor : Editor
     SerializedProperty maxIterations;
     SerializedProperty entranceSize;
     SerializedProperty material;
+    SerializedProperty wallVertical;
+    SerializedProperty wallHorizontal;
 
     void OnEnable()
     {
@@ -33,6 +35,8 @@ public class DungeonCreatorEditor : Editor
         maxIterations = serializedObject.FindProperty("maxIterations");
         entranceSize = serializedObject.FindProperty("entranceSize");
         material = serializedObject.FindProperty("material");
+        wallVertical = serializedObject.FindProperty("wallVertical");
+        wallHorizontal = serializedObject.FindProperty("wallHorizontal");
     }
 
     public override void OnInspectorGUI()
@@ -68,6 +72,8 @@ public class DungeonCreatorEditor : Editor
        
         EditorGUILayout.PropertyField(entranceSize);
         EditorGUILayout.PropertyField(material);
+        EditorGUILayout.PropertyField(wallHorizontal);
+        EditorGUILayout.PropertyField(wallVertical);
 
         serializedObject.ApplyModifiedProperties();
     }

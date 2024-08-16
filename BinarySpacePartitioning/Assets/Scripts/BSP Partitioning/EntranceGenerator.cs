@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Color = UnityEngine.Color;
+using System.Reflection;
 public class EntranceGenerator
 {
     PUBLICSPACE type;
     List<RoomNode> listOfRooms;
-   
+    List<Vector2Int> EntranceHorizontalPos;
+    List<Vector2Int> EntranceVerticalPos;
+    
+
     int publicSpaceDoorNumOnWall;
     int entranceSize;
    
@@ -17,94 +24,21 @@ public class EntranceGenerator
         this.type = type;
         this.entranceSize = entranceSize;
 
-        GenerateEntrance();
     }
-    void GenerateEntrance()
+    public void SetEntrancePossibleList(List<Vector2Int> entranceHPos, List<Vector2Int> entranceVList)
     {
-        List<Vector2Int> roomVertexes = new List<Vector2Int>();
-
-        //모든 방 꼭짓점 리스트 만들기
-        foreach (var room in listOfRooms)
-        {
-            roomVertexes.Add(room.BottomLeftAreaCorner);
-            roomVertexes.Add(room.BottomRightAreaCorner);
-            roomVertexes.Add(room.TopLeftAreaCorner);
-            roomVertexes.Add(room.TopRightAreaCorner);
-        }
-
-        RoomNode currentNode;
-
-        foreach (var room in listOfRooms)
-        {
-            if (room.Parent == null)
-                continue;
-
-            currentNode = room.Parent;
-
-            while (currentNode.Parent != null)
-            {
-                GenerateEntranceLogic(currentNode, roomVertexes);
-                currentNode = currentNode.Parent;
-            }
-
-
-        }
-
-        //공용공간이 있을 경우 공용공간에 통로 따로 생성
-        if (type != PUBLICSPACE.none)
-        {
-            RoomNode publicSpaceNode = listOfRooms[0];
-
-            switch (type)
-            {
-                //왼쪽 아래 코너에 공용공간이 있을 경우, 해당 공간의 오른쪽, 위쪽 벽면에 통로 생성
-                case PUBLICSPACE.left_bottom:
-
-                    while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[1], roomVertexes);
-                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[3], roomVertexes);
-                    break;
-
-                //오른쪽 아래 코너에 공용공간이 있을 경우, 해당 공간의 왼쪽, 위쪽 벽면에 통로 생성
-                case PUBLICSPACE.right_bottom:
-                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[0], roomVertexes);
-                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[3], roomVertexes);
-                    break;
-
-                //오른쪽 위 코너에 공용공간이 있을 경우, 해당 공간의 왼쪽, 아래쪽 벽면에 통로 생성
-                case PUBLICSPACE.right_top:
-                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[0], roomVertexes);
-                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[2], roomVertexes);
-                    break;
-
-                //왼쪽 위 코너에 공용공간이 있을 경우, 해당 공간의 아래쪽, 오른쪽 벽면에 통로 생성
-                case PUBLICSPACE.left_top:
-                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[2], roomVertexes);
-                    while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[1], roomVertexes);
-                    break;
-
-                //중앙에 공용공간이 있을 경우, 해당 공간의 4벽면에 통로 생성
-                case PUBLICSPACE.center:
-                    while (publicSpaceNode.WallList[2].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[2], roomVertexes);
-                    while (publicSpaceNode.WallList[1].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[1], roomVertexes);
-                    while (publicSpaceNode.WallList[0].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[0], roomVertexes);
-                    while (publicSpaceNode.WallList[3].DoorNum() < publicSpaceDoorNumOnWall)
-                        GenerateEntranceLogic(publicSpaceNode.WallList[3], roomVertexes);
-                    break;
-            }
-        }
+        this.EntranceHorizontalPos = entranceHPos;
+        this.EntranceVerticalPos= entranceVList;
     }
-    void GenerateEntranceLogic(RoomNode room, List<Vector2Int> roomVertexes)
+
+    public void GenerateEntrance()
+    {
+
+        MakepossibleEntrancePos();
+        GenerateEntranceLogic();
+       
+    }
+   /* void GenerateEntranceLogic(RoomNode room, List<Vector2Int> roomVertexes)
     {
         Vector2Int doorCoordinate = Vector2Int.zero;
         Wall line = room.GetDivideLine();
@@ -267,9 +201,84 @@ public class EntranceGenerator
 
         //구분선 그리기
         DrawLine(wall, doorCoordinate);
+    }*/
+
+    void GenerateEntranceLogic() 
+    {
+        List<Vector2Int> prevPoint = new List<Vector2Int>();
+
+        for (int i = 0; i < EntranceHorizontalPos.Count-1; i++)
+        {
+            Vector2Int point1 = EntranceHorizontalPos[i];
+            List<Vector2Int> pointList = new List<Vector2Int>();
+
+
+            bool flag=false;
+            foreach (var prev in prevPoint)
+                if (prev == point1)
+                    flag=true;
+
+            if (flag) continue;
+
+            pointList.Add(point1);
+            for (int j=i+1;j<EntranceHorizontalPos.Count ; j++)
+            {
+                Vector2Int point2 = EntranceHorizontalPos[j];
+              
+
+                if (IsOnSameLine(point1, point2, Orientation.Horizontal))
+                {
+                    pointList.Add(point2);
+                    prevPoint.Add(point2);
+                    point1 = point2;
+                }
+             
+
+            }
+
+
+            //문 생성
+            Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+            DrawLine(Orientation.Horizontal, entranceCoordinate);
+        }
+
+
+        prevPoint = new List<Vector2Int>();
+        for (int i = 0; i < EntranceVerticalPos.Count - 1; i++)
+        {
+            Vector2Int point1 = EntranceVerticalPos[i];
+            List<Vector2Int> pointList = new List<Vector2Int>();
+
+            bool flag = false;
+            foreach (var prev in prevPoint)
+                if (prev == point1)
+                    flag = true;
+
+            if (flag) continue;
+
+            pointList.Add(point1);
+
+            for (int j = i + 1; j < EntranceVerticalPos.Count; j++)
+            {
+                Vector2Int point2 = EntranceVerticalPos[j];
+                if (IsOnSameLine(point1, point2, Orientation.Vertical))
+                {
+                    pointList.Add(point2);
+                    prevPoint.Add(point2);
+                    point1 = point2;
+                }
+               
+            }
+
+            //문 생성
+            Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+            DrawLine(Orientation.Vertical, entranceCoordinate);
+
+        }
+
     }
 
-    void DrawLine(Wall line, Vector2Int doorCoordinate)
+    /*void DrawLine(Wall line, Vector2Int doorCoordinate)
     {
         //OutLine
         GameObject door = new GameObject("Door");
@@ -300,8 +309,40 @@ public class EntranceGenerator
 
 
         lineDoor.enabled = true;
+    }*/
+    void DrawLine(Orientation ori, Vector2Int doorCoordinate)
+    {
+        //OutLine
+        GameObject door = new GameObject("Door");
+
+        door.transform.position = Vector3.zero;
+        door.transform.localScale = Vector3.one;
+
+
+        LineRenderer lineDoor = door.AddComponent<LineRenderer>();
+        lineDoor.positionCount = 2;
+        lineDoor.startColor = Color.green;
+        lineDoor.endColor = Color.green;
+        lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+        lineDoor.sortingOrder = 1;
+
+        lineDoor.enabled = false;
+
+        if (ori == Orientation.Horizontal)
+        {
+            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
+        }
+        else
+        {
+            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
+            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
+        }
+
+
+        lineDoor.enabled = true;
     }
-    bool IsDoorOverlap(Vector2Int newDoor, Vector2Int otherDoor, Orientation ori)
+   /* bool IsDoorOverlap(Vector2Int newDoor, Vector2Int otherDoor, Orientation ori)
     {
         bool overlap = false;
 
@@ -321,7 +362,7 @@ public class EntranceGenerator
         }
 
         return overlap;
-    }
+    }*/
 
     bool IsOnVertex(Vector2Int newDoor, Vector2Int vertex, Orientation ori)
     {
@@ -338,5 +379,67 @@ public class EntranceGenerator
         }
 
         return onVertex;
+    }
+    void MakepossibleEntrancePos()
+    {
+        List<Vector2Int> roomVertexes = new List<Vector2Int>();
+
+        //모든 방 꼭짓점 리스트 만들기
+        foreach (var room in listOfRooms)
+        {
+            roomVertexes.Add(room.BottomLeftAreaCorner);
+            roomVertexes.Add(room.BottomRightAreaCorner);
+            roomVertexes.Add(room.TopLeftAreaCorner);
+            roomVertexes.Add(room.TopRightAreaCorner);
+        }
+
+        //방문 생성 위치(가로)가 꼭짓점에 겹치지 않도록 함
+        var pointsToRemove = new List<Vector2Int>();
+        foreach (var point in EntranceHorizontalPos)
+        {
+            foreach(var vertexPoint in roomVertexes)
+            {
+                if (IsOnVertex(point, vertexPoint, Orientation.Horizontal))
+                    pointsToRemove.Add(point);
+            }
+        }
+        foreach (var point in pointsToRemove)
+            EntranceHorizontalPos.Remove(point);
+
+        //방문 생성 위치(세로)가 꼭짓점에 겹치지 않도록 함
+        pointsToRemove = new List<Vector2Int>();
+        foreach (var point in EntranceVerticalPos)
+        {
+            foreach (var vertexPoint in roomVertexes)
+            {
+                if (IsOnVertex(point, vertexPoint, Orientation.Vertical))
+                    pointsToRemove.Add(point);
+            }
+        }
+        foreach (var point in pointsToRemove)
+            EntranceVerticalPos.Remove(point);
+
+       
+    }
+
+    bool IsOnSameLine(Vector2Int point1, Vector2Int point2, Orientation ori)
+    {
+        bool OnSameLine = false;
+
+        if(ori == Orientation.Horizontal)
+        {
+            if ((point1.y == point2.y) && (point1.x + 1 == point2.x))
+                OnSameLine = true;
+        }
+            
+
+        else
+        {
+            if ((point1.x == point2.x) && (point1.y + 1 == point2.y))
+                OnSameLine = true;
+        }
+        
+
+        return OnSameLine;
     }
 }
