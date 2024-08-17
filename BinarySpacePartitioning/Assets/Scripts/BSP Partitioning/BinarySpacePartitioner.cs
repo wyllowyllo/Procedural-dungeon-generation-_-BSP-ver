@@ -69,7 +69,7 @@ public class BinarySpacePartitioner
                                , currentNode
                                , currentNode.TreeIndex + 1);
 
-            currentNode.SetDivideLine(new Vector2Int(currentNode.BottomLeftAreaCorner.x, line.Coordinates.y), new Vector2Int(currentNode.TopRightAreaCorner.x, line.Coordinates.y));
+            //currentNode.SetDivideLine(new Vector2Int(currentNode.BottomLeftAreaCorner.x, line.Coordinates.y), new Vector2Int(currentNode.TopRightAreaCorner.x, line.Coordinates.y));
         }
         else
         {
@@ -80,7 +80,7 @@ public class BinarySpacePartitioner
                                , currentNode
                                , currentNode.TreeIndex + 1);
 
-            currentNode.SetDivideLine(new Vector2Int(line.Coordinates.x, currentNode.TopRightAreaCorner.y), new Vector2Int(line.Coordinates.x, currentNode.BottomLeftAreaCorner.y));
+            //currentNode.SetDivideLine(new Vector2Int(line.Coordinates.x, currentNode.TopRightAreaCorner.y), new Vector2Int(line.Coordinates.x, currentNode.BottomLeftAreaCorner.y));
         }
 
         AddNewNodeToCollections(listToReturn, graph, node1);

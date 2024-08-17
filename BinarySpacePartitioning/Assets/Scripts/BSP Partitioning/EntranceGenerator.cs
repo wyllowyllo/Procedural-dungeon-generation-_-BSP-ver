@@ -121,22 +121,25 @@ public class EntranceGenerator
 
     void ConnectWallAndDoorInfo(Vector2Int doorCoordinate, Orientation doorOrientation)
     {
-       
+       List<RoomNode> parentRooms = new List<RoomNode>();
+       Door door = new Door(doorCoordinate, entranceSize, doorOrientation);
+
         //모든 방의 벽면 조사하여, 해당 문 좌표에 해당하는 벽을 가진 방에 문 정보 추가
-        foreach(var room in listOfRooms)
+        foreach (var room in listOfRooms)
         {
             foreach(var wall in room.WallList)
             {
                 //TODO:문 클래스 추가해서, 방과 문이 서로의 정보를 가지도록 수정
                 if(IsDoorInWallRange(wall, doorCoordinate, doorOrientation))
                 {
-                    wall.AddDoor(doorCoordinate);
-                   
+                    wall.AddDoor(door);
+                    parentRooms.Add(room);
                 }
                    
             }
         }
         
+        door.ParentRooms = parentRooms; //해당 문이 연결하는 두 방(안쪽, 바깥쪽) 추가
        
     }
 

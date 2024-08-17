@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class RoomNode
 {
+    public string roomName = "";
+
     // 사각형 꼭짓점 좌표
     public Vector2Int BottomLeftAreaCorner { get; set; }
     public Vector2Int BottomRightAreaCorner { get; set; }
@@ -65,26 +67,7 @@ public class RoomNode
         wallList.Add(bottomWall);
         wallList.Add(topWall);
     }
-   /* public Wall GetWall(string type)
-    {
-        Wall wall=null;
-        switch(type)
-        {
-            case "Left":
-                wall = leftWall;
-                break;
-            case "Right":
-                wall = rightWall;
-                break;
-            case "Bottom":
-                wall = bottomWall;
-                break;
-            case "Top":
-                wall = topWall;
-                break; 
-        }
-        return wall;
-    }*/
+   
     public void SetDivideLine(Vector2Int leftPoint, Vector2Int rightPoint)
     {
         divideLine=new Wall(leftPoint, rightPoint);

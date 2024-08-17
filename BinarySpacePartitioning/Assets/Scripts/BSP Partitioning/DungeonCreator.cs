@@ -128,6 +128,7 @@ public class DungeonCreator : MonoBehaviour
             case PUBLICSPACE.none:
             default:
                GenerateDungeon(new Vector2Int(0,0),dungeonWidth, dungeonHeight, type);
+                Visualize(); //바닥타일 깔고 구분선 만들기
                 break;
 
             case PUBLICSPACE.left_bottom:
@@ -136,7 +137,8 @@ public class DungeonCreator : MonoBehaviour
             case PUBLICSPACE.left_top:
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
-               
+                listOfRooms[0].roomName = "LivingRoom";
+
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
                 {
@@ -151,6 +153,7 @@ public class DungeonCreator : MonoBehaviour
             case PUBLICSPACE.center:
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
+                listOfRooms[0].roomName = "CenterRoom";
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -164,6 +167,7 @@ public class DungeonCreator : MonoBehaviour
             case PUBLICSPACE.plaza:
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
+                listOfRooms[0].roomName = "Plaza";
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -191,8 +195,7 @@ public class DungeonCreator : MonoBehaviour
            
             Ground = generator.GetRootNode();  //전체 그라운드(루트 노드)
             listOfRooms = leafList;
-            //바닥타일 깔고 구분선 만들기
-            Visualize();
+           
         }
         else
         {
@@ -417,13 +420,17 @@ public class DungeonCreator : MonoBehaviour
 
     void Visualize()
     {
+        SetRoomName();
+
         for (int i = 0; i < listOfRooms.Count; i++)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName);
         }
     }
     private void VisualizeForPlaza()
     {
+        SetRoomName();
+
         //정N각형 좌표(중점을 기준으로 좌표 원형배치)
         Vector3[] vertices = new Vector3[polygon + 1];
 
@@ -454,11 +461,11 @@ public class DungeonCreator : MonoBehaviour
         // 공용공간 외 나머지 방들
         for (int i = 1; i < listOfRooms.Count; i++)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName);
         }
     }
 
-    void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
+    void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner, string roomName)
     {
         Vector3 bottomLeftV = new Vector3(bottomLeftCorner.x, 0, bottomLeftCorner.y);
         Vector3 bottomRightV=new Vector3(topRightCorner.x,0,bottomLeftCorner.y);
@@ -495,7 +502,7 @@ public class DungeonCreator : MonoBehaviour
 
         int width = (int)(topRightCorner.x - bottomLeftCorner.x);
         int height=(int)(topRightCorner.y-bottomLeftCorner.y);
-        GameObject dungeonFloor = new GameObject("Mesh" + "("+width+", "+height+")", typeof(MeshFilter), typeof(MeshRenderer));
+        GameObject dungeonFloor = new GameObject(roomName + "("+width+", "+height+")", typeof(MeshFilter), typeof(MeshRenderer));
 
         dungeonFloor.transform.position= Vector3.zero;
         dungeonFloor.transform.localScale= Vector3.one;
@@ -614,7 +621,17 @@ public class DungeonCreator : MonoBehaviour
         entranceGenerator.GenerateEntrance();
     }
 
-    
+    void SetRoomName()
+    {
+        int idx = 0;
+        foreach(var room in listOfRooms)
+        {
+            if (room.roomName != null)
+            {
+                room.roomName = "room" + idx++;
+            }
+        }
+    }
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
     {
         roomWidthMin = Mathf.Clamp(roomWidthMin, 10, dungeonWidth);

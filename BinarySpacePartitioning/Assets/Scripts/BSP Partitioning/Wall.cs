@@ -7,7 +7,7 @@ public class Wall
     Vector2Int leftVertex;
     Vector2Int rightVertex;
     int length;
-    List<Vector2Int> doorPos= new List<Vector2Int>();
+    List<Door> doors= new List<Door>();
 
     public Wall(Vector2Int leftVertex, Vector2Int rightVertex)
     {
@@ -23,17 +23,17 @@ public class Wall
     public Orientation Orientation { get => orientation; }
     public int Length { get => length; }
 
-    public void AddDoor(Vector2Int doorPosition)
+    public void AddDoor(Door door)
     {
-        doorPos.Add(doorPosition);
+        doors.Add(door);
     }
-    public List<Vector2Int> GetDoorList()
+    public List<Door> GetDoorList()
     {
-        return doorPos;
+        return doors;
     }
     public int DoorNum()
     {
-        return doorPos.Count;
+        return doors.Count;
     }
 
    
