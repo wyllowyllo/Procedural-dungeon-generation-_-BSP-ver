@@ -36,177 +36,15 @@ public class EntranceGenerator
 
         MakepossibleEntrancePos();
         GenerateEntranceLogic();
-       
+
     }
-   /* void GenerateEntranceLogic(RoomNode room, List<Vector2Int> roomVertexes)
-    {
-        Vector2Int doorCoordinate = Vector2Int.zero;
-        Wall line = room.GetDivideLine();
-
-        //각 분할선마다 1개의 출입구 만들기
-        if (line.DoorNum() != 0)
-            return;
-
-        if (line.Orientation == Orientation.Horizontal)
-        {
-
-            bool overlap = true;
-            while (overlap)
-            {
-                doorCoordinate = new Vector2Int(Random.Range(line.LeftVertex.x, line.RightVertex.x - entranceSize), line.LeftVertex.y);
-
-                foreach (var roomVertex in roomVertexes)
-                {
-                    overlap = false;
-
-                    //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Horizontal))
-                    {
-                        overlap = true;
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var doorPos in room.GetDivideLine().GetDoorList())
-                        {
-                            //문이 겹치지 않도록 생성
-                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Horizontal))
-                            {
-                                overlap = true;
-                                break;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-
-            bool overlap = true;
-            while (overlap)
-            {
-                doorCoordinate = new Vector2Int(line.LeftVertex.x, Random.Range(line.RightVertex.y, line.LeftVertex.y - entranceSize));
-
-                foreach (var roomVertex in roomVertexes)
-                {
-                    overlap = false;
-
-                    //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Vertical))
-                    {
-                        overlap = true;
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var doorPos in room.GetDivideLine().GetDoorList())
-                        {
-                            //문이 겹치지 않도록 생성
-                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Vertical))
-                            {
-                                overlap = true;
-                                break;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        line.AddDoor(doorCoordinate);
-
-        //구분선 그리기
-        DrawLine(line, doorCoordinate);
-    }
-    void GenerateEntranceLogic(Wall wall, List<Vector2Int> roomVertexes)
-    {
-        Vector2Int doorCoordinate = Vector2Int.zero;
-
-
-
-
-        if (wall.Orientation == Orientation.Horizontal)
-        {
-
-            bool overlap = true;
-            while (overlap)
-            {
-                doorCoordinate = new Vector2Int(Random.Range(wall.LeftVertex.x, wall.RightVertex.x - entranceSize), wall.LeftVertex.y);
-
-                foreach (var roomVertex in roomVertexes)
-                {
-                    overlap = false;
-
-                    //문의 x좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Horizontal))
-                    {
-                        overlap = true;
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var doorPos in wall.GetDoorList())
-                        {
-                            //문이 겹치지 않도록 생성
-                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Horizontal))
-                            {
-                                overlap = true;
-                                break;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-
-            bool overlap = true;
-            while (overlap)
-            {
-                doorCoordinate = new Vector2Int(wall.LeftVertex.x, Random.Range(wall.RightVertex.y, wall.LeftVertex.y - entranceSize));
-
-                foreach (var roomVertex in roomVertexes)
-                {
-                    overlap = false;
-
-                    //문의 y좌표 범위가 어떠한 방의 꼭짓점에 해당될 경우 재생성
-                    if (IsOnVertex(doorCoordinate, roomVertex, Orientation.Vertical))
-                    {
-                        overlap = true;
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var doorPos in wall.GetDoorList())
-                        {
-                            //문이 겹치지 않도록 생성
-                            if (IsDoorOverlap(doorCoordinate, doorPos, Orientation.Vertical))
-                            {
-                                overlap = true;
-                                break;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        wall.AddDoor(doorCoordinate);
-
-        //구분선 그리기
-        DrawLine(wall, doorCoordinate);
-    }*/
+   
 
     void GenerateEntranceLogic() 
     {
         List<Vector2Int> prevPoint = new List<Vector2Int>();
 
+        //통로 생성 가능한 가로 벽면 하나당 1개의 문 생성
         for (int i = 0; i < EntranceHorizontalPos.Count-1; i++)
         {
             Vector2Int point1 = EntranceHorizontalPos[i];
@@ -239,10 +77,12 @@ public class EntranceGenerator
 
             //문 생성
             Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+            ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
             DrawLine(Orientation.Horizontal, entranceCoordinate);
         }
 
 
+        //통로 생성 가능한 세로 벽면 하나당 1개의 문 생성
         prevPoint = new List<Vector2Int>();
         for (int i = 0; i < EntranceVerticalPos.Count - 1; i++)
         {
@@ -272,44 +112,53 @@ public class EntranceGenerator
 
             //문 생성
             Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+            ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
             DrawLine(Orientation.Vertical, entranceCoordinate);
 
         }
 
     }
 
-    /*void DrawLine(Wall line, Vector2Int doorCoordinate)
+    void ConnectWallAndDoorInfo(Vector2Int doorCoordinate, Orientation doorOrientation)
     {
-        //OutLine
-        GameObject door = new GameObject("Door");
-
-        door.transform.position = Vector3.zero;
-        door.transform.localScale = Vector3.one;
-
-
-        LineRenderer lineDoor = door.AddComponent<LineRenderer>();
-        lineDoor.positionCount = 2;
-        lineDoor.startColor = Color.green;
-        lineDoor.endColor = Color.green;
-        lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-        lineDoor.sortingOrder = 1;
-
-        lineDoor.enabled = false;
-
-        if (line.Orientation == Orientation.Horizontal)
+       
+        //모든 방의 벽면 조사하여, 해당 문 좌표에 해당하는 벽을 가진 방에 문 정보 추가
+        foreach(var room in listOfRooms)
         {
-            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x + entranceSize, 2, doorCoordinate.y));
+            foreach(var wall in room.WallList)
+            {
+                //TODO:문 클래스 추가해서, 방과 문이 서로의 정보를 가지도록 수정
+                if(IsDoorInWallRange(wall, doorCoordinate, doorOrientation))
+                {
+                    wall.AddDoor(doorCoordinate);
+                   
+                }
+                   
+            }
+        }
+        
+       
+    }
+
+    bool IsDoorInWallRange(Wall wall, Vector2Int doorPos, Orientation ori)
+    {
+        bool InRange = false;
+
+        if(ori == Orientation.Horizontal)
+        {
+            if((wall.LeftVertex.x<=doorPos.x && wall.LeftVertex.y==doorPos.y) &&(wall.RightVertex.x>=doorPos.x+entranceSize))
+                InRange= true;
         }
         else
         {
-            lineDoor.SetPosition(0, new Vector3(doorCoordinate.x, 2, doorCoordinate.y));
-            lineDoor.SetPosition(1, new Vector3(doorCoordinate.x, 2, doorCoordinate.y + entranceSize));
+            if ((wall.RightVertex.y <= doorPos.y && wall.RightVertex.x == doorPos.x) && (wall.LeftVertex.y >= doorPos.y + entranceSize))
+                InRange = true;
         }
 
+        return InRange;
+    }
 
-        lineDoor.enabled = true;
-    }*/
+    
     void DrawLine(Orientation ori, Vector2Int doorCoordinate)
     {
         //OutLine
@@ -342,28 +191,7 @@ public class EntranceGenerator
 
         lineDoor.enabled = true;
     }
-   /* bool IsDoorOverlap(Vector2Int newDoor, Vector2Int otherDoor, Orientation ori)
-    {
-        bool overlap = false;
-
-        if (ori == Orientation.Horizontal)
-        {
-            if ((newDoor.x <= otherDoor.x && newDoor.y == otherDoor.y) && (otherDoor.x <= newDoor.x + entranceSize && newDoor.y == otherDoor.y))
-                overlap = true;
-            else if ((newDoor.x >= otherDoor.x && newDoor.y == otherDoor.y) && (newDoor.x <= otherDoor.x + entranceSize && newDoor.y == otherDoor.y))
-                overlap = true;
-        }
-        else
-        {
-            if ((newDoor.y <= otherDoor.y && newDoor.x == otherDoor.x) && (otherDoor.y <= newDoor.y + entranceSize && newDoor.x == otherDoor.x))
-                overlap = true;
-            else if ((newDoor.y >= otherDoor.y && newDoor.x == otherDoor.x) && (newDoor.y <= otherDoor.y + entranceSize && newDoor.x == otherDoor.x))
-                overlap = true;
-        }
-
-        return overlap;
-    }*/
-
+   
     bool IsOnVertex(Vector2Int newDoor, Vector2Int vertex, Orientation ori)
     {
         bool onVertex = false;
