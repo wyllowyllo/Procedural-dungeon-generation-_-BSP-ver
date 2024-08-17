@@ -77,8 +77,9 @@ public class EntranceGenerator
 
             //문 생성
             Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
-            ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
-            DrawLine(Orientation.Horizontal, entranceCoordinate);
+            Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
+            //DrawLine(Orientation.Horizontal, entranceCoordinate);
+            DrawLine(Orientation.Vertical, door);
         }
 
 
@@ -112,14 +113,15 @@ public class EntranceGenerator
 
             //문 생성
             Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
-            ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
-            DrawLine(Orientation.Vertical, entranceCoordinate);
+            Door door=ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
+            //DrawLine(Orientation.Vertical, entranceCoordinate);
+            DrawLine(Orientation.Vertical, door);
 
         }
 
     }
 
-    void ConnectWallAndDoorInfo(Vector2Int doorCoordinate, Orientation doorOrientation)
+    Door ConnectWallAndDoorInfo(Vector2Int doorCoordinate, Orientation doorOrientation)
     {
        List<RoomNode> parentRooms = new List<RoomNode>();
        Door door = new Door(doorCoordinate, entranceSize, doorOrientation);
@@ -140,7 +142,8 @@ public class EntranceGenerator
         }
         
         door.ParentRooms = parentRooms; //해당 문이 연결하는 두 방(안쪽, 바깥쪽) 추가
-       
+
+        return door;
     }
 
     bool IsDoorInWallRange(Wall wall, Vector2Int doorPos, Orientation ori)
@@ -194,7 +197,39 @@ public class EntranceGenerator
 
         lineDoor.enabled = true;
     }
-   
+    void DrawLine(Orientation ori,Door door)
+    {
+        //OutLine
+        GameObject doorLine = new GameObject("Door  " + (door.ParentRooms[0].roomName)+"-"+(door.ParentRooms[1].roomName));
+
+        doorLine.transform.position = Vector3.zero;
+        doorLine.transform.localScale = Vector3.one;
+
+
+        LineRenderer lineDoor = doorLine.AddComponent<LineRenderer>();
+        lineDoor.positionCount = 2;
+        lineDoor.startColor = Color.green;
+        lineDoor.endColor = Color.green;
+        lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+        lineDoor.sortingOrder = 1;
+
+        lineDoor.enabled = false;
+
+        if (ori == Orientation.Horizontal)
+        {
+            lineDoor.SetPosition(0, new Vector3(door.DoorLeftPoint.x, 2, door.DoorLeftPoint.y));
+            lineDoor.SetPosition(1, new Vector3(door.DoorRightPoint.x + entranceSize, 2, door.DoorRightPoint.y));
+        }
+        else
+        {
+            lineDoor.SetPosition(0, new Vector3(door.DoorRightPoint.x, 2, door.DoorRightPoint.y));
+            lineDoor.SetPosition(1, new Vector3(door.DoorLeftPoint.x, 2, door.DoorLeftPoint.y));
+        }
+
+
+        lineDoor.enabled = true;
+    }
+
     bool IsOnVertex(Vector2Int newDoor, Vector2Int vertex, Orientation ori)
     {
         bool onVertex = false;

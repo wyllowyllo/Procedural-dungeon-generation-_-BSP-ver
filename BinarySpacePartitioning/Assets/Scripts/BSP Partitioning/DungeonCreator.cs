@@ -626,7 +626,7 @@ public class DungeonCreator : MonoBehaviour
         int idx = 0;
         foreach(var room in listOfRooms)
         {
-            if (room.roomName != null)
+            if (room.roomName == null)
             {
                 room.roomName = "room" + idx++;
             }

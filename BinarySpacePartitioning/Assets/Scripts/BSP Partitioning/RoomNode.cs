@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RoomNode
 {
-    public string roomName = "";
+    public string roomName = null;
 
     // 사각형 꼭짓점 좌표
     public Vector2Int BottomLeftAreaCorner { get; set; }
