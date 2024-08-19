@@ -9,11 +9,13 @@ internal class DungeonGenerator
      
     int dungeonWidth;
     int dungeonHeight;
+    int gridSize;
 
-    public DungeonGenerator(int dungeonWidth, int dungeonHeight)
+    public DungeonGenerator(int dungeonWidth, int dungeonHeight, int gridSize)
     {
         this.dungeonWidth = dungeonWidth;
         this.dungeonHeight = dungeonHeight;
+        this.gridSize = gridSize;
     }
     public List<RoomNode> CalculateRooms(Vector2Int startPoint, int maxIterations, int roomWidthMin, int roomHeightMin, PUBLICSPACE type)
     {
@@ -63,7 +65,7 @@ internal class DungeonGenerator
     {
         foreach(RoomNode roomNode in roomSpaces)
         {
-            roomNode.SetGrid();
+            roomNode.SetGrid(gridSize);
         }
     }
     public RoomNode GetRootNode()

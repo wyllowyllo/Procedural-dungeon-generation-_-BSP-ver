@@ -122,7 +122,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "LivingRoom";
-                listOfRooms[0].SetGrid();
+                listOfRooms[0].SetGrid(gridSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -139,7 +139,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "CenterRoom";
-                listOfRooms[0].SetGrid();
+                listOfRooms[0].SetGrid(gridSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -171,7 +171,7 @@ public class DungeonCreator : MonoBehaviour
 
     private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
     {
-        DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight);
+        DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight, gridSize);
         List<RoomNode> leafList = generator.CalculateRooms(startPoint, maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
 
       
@@ -629,7 +629,7 @@ public class DungeonCreator : MonoBehaviour
                 {
                     for (int y = 0; y < room.RoomGrid.GetLength(1); y++)
                     {
-                        Vector2Int worldPos = room.GridToWorldPosition(x, y, 1);
+                        Vector2Int worldPos = room.GridToWorldPosition(x, y, gridSize);
                         Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
                         Gizmos.DrawCube(new Vector3(worldPos.x,0, worldPos.y), Vector3.one*0.9f);
                     }
