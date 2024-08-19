@@ -47,6 +47,8 @@ public class DungeonCreator : MonoBehaviour
     [Header("etc")]
     [Tooltip("문의 크기는 벽의 크기보다 클 수 없습니다.")]
     public int entranceSize; //문 너비
+    [Range(1, 5)]
+    public int gridSize;//그리드 크기
    
    
     public Material material; // For Visualizing
@@ -98,28 +100,10 @@ public class DungeonCreator : MonoBehaviour
     {
         CreateDungeon();
         CreateEntrance();
-        //VisualizeWall();
-    }
-
-    private void VisualizeWall()
-    {
-       
-
-        //생성
-        /* foreach (var wallPosition in WallHorizontalPos)
-         {
-
-             Instantiate(wallHorizontal, wallPosition, Quaternion.identity);
-         }
-
-         foreach (var wallPosition in WallVerticalPos)
-         {
-
-             Instantiate(wallVertical, wallPosition, Quaternion.identity);
-         }*/
 
     }
 
+   
     public void CreateDungeon()
     {
         List<RoomNode> rootList;
@@ -138,6 +122,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "LivingRoom";
+                listOfRooms[0].SetGrid();
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -154,6 +139,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "CenterRoom";
+                listOfRooms[0].SetGrid();
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -632,6 +618,27 @@ public class DungeonCreator : MonoBehaviour
             }
         }
     }
+    
+    void OnDrawGizmos()
+    {
+        foreach(var room in listOfRooms)
+        {
+            if (room.RoomGrid != null)
+            {
+                for (int x = 0; x < room.RoomGrid.GetLength(0); x++)
+                {
+                    for (int y = 0; y < room.RoomGrid.GetLength(1); y++)
+                    {
+                        Vector2Int worldPos = room.GridToWorldPosition(x, y, 1);
+                        Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
+                        Gizmos.DrawCube(new Vector3(worldPos.x,0, worldPos.y), Vector3.one*0.9f);
+                    }
+                }
+            }
+        }
+        
+    }
+
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
     {
         roomWidthMin = Mathf.Clamp(roomWidthMin, 10, dungeonWidth);
