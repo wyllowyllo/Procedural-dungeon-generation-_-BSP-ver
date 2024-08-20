@@ -9,17 +9,17 @@ internal class DungeonGenerator
      
     int dungeonWidth;
     int dungeonHeight;
-    int gridSize;
+    int unitSize;
 
-    public DungeonGenerator(int dungeonWidth, int dungeonHeight, int gridSize)
+    public DungeonGenerator(int dungeonWidth, int dungeonHeight, int unitSize)
     {
         this.dungeonWidth = dungeonWidth;
         this.dungeonHeight = dungeonHeight;
-        this.gridSize = gridSize;
+        this.unitSize = unitSize;
     }
     public List<RoomNode> CalculateRooms(Vector2Int startPoint, int maxIterations, int roomWidthMin, int roomHeightMin, PUBLICSPACE type)
     {
-        BinarySpacePartitioner bsp = new BinarySpacePartitioner(startPoint,dungeonWidth, dungeonHeight);
+        BinarySpacePartitioner bsp = new BinarySpacePartitioner(startPoint,dungeonWidth, dungeonHeight, unitSize);
         allSpaceNodes=bsp.PrepareNodesCollection(maxIterations, roomWidthMin, roomHeightMin, type); //트리를 구성하는 노드 전체 받아오기
         RoomNode rootNode = allSpaceNodes[0];
 
@@ -65,7 +65,7 @@ internal class DungeonGenerator
     {
         foreach(RoomNode roomNode in roomSpaces)
         {
-            roomNode.SetGrid(gridSize);
+            roomNode.SetGrid(unitSize);
         }
     }
     public RoomNode GetRootNode()

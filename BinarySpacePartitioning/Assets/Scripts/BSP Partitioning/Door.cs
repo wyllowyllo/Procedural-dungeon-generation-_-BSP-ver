@@ -7,7 +7,7 @@ public class Door
     Vector2Int doorRightPoint;//문의 오른쪽 끝 또는 아래 끝 좌표 
     Orientation doorOrientation;
     List<RoomNode> parentRooms; //0번. 1번 인덱스의 방들이 해당 문이 연결하고 있는 방들임.
-    //Dictionary<string, RoomNode> rooms;
+   
 
     public Door(Vector2Int entranceCoordinate, int entranceSize, Orientation doorOrientation)
     {

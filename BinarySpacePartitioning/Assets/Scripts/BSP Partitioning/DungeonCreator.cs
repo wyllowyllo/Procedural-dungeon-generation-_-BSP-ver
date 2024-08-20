@@ -9,29 +9,33 @@ using Random = UnityEngine.Random;
 using Color = UnityEngine.Color;
 using System;
 
+public enum UNITSIZE { SIZE_5=5, SIZE_10 = 10}
 public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
     [Header("생성 타입")] public PUBLICSPACE type;
 
+    
+    public UNITSIZE unitSize;//단위 설정
+
     [Header("그라운드 크기")]
+    [Tooltip("단위는 unitSize입니다.")]
     public int dungeonWidth;
     public int dungeonHeight;
 
     [Header("최소 방 크기")]
-    [Tooltip("크기는 10보다 커야하며, dungeonWidth를 초과할 수 없습니다.")]
+    [Tooltip("단위는 unitSize이며, dungeonWidth를 초과할 수 없습니다.")]
     public int roomWidthMin;
-    [Tooltip("크기는 10보다 커야하며, dungeonHeight를 초과할 수 없습니다.")]
+    [Tooltip("단위는 unitSize이며, dungeonHeight를 초과할 수 없습니다.")]
     public int roomHeightMin;
 
     [Header("공용공간 크기")]
-    [Tooltip("크기는 10보다 커야하며,dungeonWidth를 초과할 수 없습니다.")]
+    [Tooltip("단위는 unitSize이며, dungeonWidth를 초과할 수 없습니다.")]
     public int publicSpaceWidth; 
-    [Tooltip("크기는 10보다 커야하며,dungeonHeight를 초과할 수 없습니다.")]
+    [Tooltip("단위는 unitSize이며, dungeonHeight를 초과할 수 없습니다.")]
     public int publicSpaceHeight;
 
-    [Header("공용공간 벽면당 문 개수")]
-    public int publicSpaceDoorNumOnWall; 
+   
 
     [Header("Plaza 타입 반지름")]
     [Tooltip("최대길이 = (그라운드 너비, 높이 중 작은 값의 절반)")]
@@ -45,15 +49,10 @@ public class DungeonCreator : MonoBehaviour
     public int maxIterations; //최대 분할 횟수 - 트리 높이 제한, 이 값이 작을수록 비교적 큰 방이 만들어짐 (PublicSpace 타입이 none일 경우에만 적용)
 
     [Header("etc")]
-    [Tooltip("문의 크기는 벽의 크기보다 클 수 없습니다.")]
-    public int entranceSize; //문 너비
-    [Range(1, 5)]
-    public int gridSize;//그리드 크기
-   
-   
     public Material material; // For Visualizing
     public GameObject wallVertical, wallHorizontal;
 
+    int entranceSize; //문 너비
     List<Vector2Int> WallHorizontalPos; //가로 벽 좌표값 전체
     List<Vector2Int> WallVerticalPos; // 세로 벽 좌표값 전체
     List<Vector2Int> EntranceHorizontalCandidate; //방문 생성 가능한 가로 벽 좌표(방과 방이 공유하는 선)
@@ -65,19 +64,36 @@ public class DungeonCreator : MonoBehaviour
 
     private void Awake()
     {
+        entranceSize = 10;
+
         if (type == PUBLICSPACE.none)
             return;
 
         if (type == PUBLICSPACE.plaza)
         {
-            //최소 방 크기는 (전체 그라운드 크기 - 광장 크기) 보다 작아야 함
-            if (roomWidthMin > (dungeonWidth - plazaRadius*2))
+            //광장기준 위아래/양옆으로 최소공간 확보하기 위함.
+            if (roomWidthMin*2 > (dungeonWidth - plazaRadius*2) || roomHeightMin * 2 > (dungeonHeight - plazaRadius * 2))
             {
-                if(dungeonWidth>dungeonHeight)
-                    plazaRadius = dungeonHeight / 2;
+      
+                if ((dungeonWidth - roomWidthMin * 2) > (dungeonHeight - roomHeightMin * 2))
+                    plazaRadius = (dungeonHeight - roomHeightMin * 2)/2;
                 else
-                    plazaRadius = dungeonWidth / 2;
-                Debug.Log("방 최소너비 또는 최소높이가 (전체너비-광장 크기)보다 커서 plazaRadius -> " + plazaRadius + "으로 확장되었습니다");
+                    plazaRadius = (dungeonWidth - roomWidthMin * 2)/2;
+
+                Debug.Log("plazaRadius -> " + plazaRadius + "으로 조정되었습니다");
+            }
+        }
+        else if (type == PUBLICSPACE.center)
+        {
+            if (roomWidthMin*2 > (dungeonWidth - publicSpaceWidth))
+            {
+                publicSpaceWidth = dungeonWidth- roomWidthMin * 2;
+                Debug.Log("공용공간 너비 = "+publicSpaceWidth+"로 조정되었습니다.");
+            }
+            if (roomHeightMin*2 > (dungeonHeight - publicSpaceHeight))
+            {
+                publicSpaceHeight = dungeonHeight- roomHeightMin * 2;
+                Debug.Log("공용공간 높이 = " + publicSpaceHeight + "로 조정되었습니다.");
             }
         }
         else
@@ -122,7 +138,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "LivingRoom";
-                listOfRooms[0].SetGrid(gridSize);
+                listOfRooms[0].SetGrid((int)unitSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -139,7 +155,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "CenterRoom";
-                listOfRooms[0].SetGrid(gridSize);
+                listOfRooms[0].SetGrid((int)unitSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -171,7 +187,7 @@ public class DungeonCreator : MonoBehaviour
 
     private void GenerateDungeon(Vector2Int startPoint, int totalWidth, int totalHeight, PUBLICSPACE type)
     {
-        DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight, gridSize);
+        DungeonGenerator generator = new DungeonGenerator(totalWidth, totalHeight, (int)unitSize);
         List<RoomNode> leafList = generator.CalculateRooms(startPoint, maxIterations, roomWidthMin, roomHeightMin, type); //리프노드 리스트(실제 생성된 방 리스트)
 
       
@@ -316,7 +332,7 @@ public class DungeonCreator : MonoBehaviour
             Vector2Int center = new Vector2Int(dungeonWidth / 2, dungeonHeight / 2); //그라운드 정중앙
             Vector2Int leftBottomPoint=new Vector2Int(center.x-(publicSpaceWidth/2), center.y-(publicSpaceHeight/2));
             Vector2Int rightTopPoint = new Vector2Int(center.x + (publicSpaceWidth / 2), center.y + (publicSpaceHeight / 2));
-
+ 
             //공용공간
             RoomNode node1 = new RoomNode(leftBottomPoint, rightTopPoint
                                 , null
@@ -403,6 +419,7 @@ public class DungeonCreator : MonoBehaviour
 
         return rootList;
     }
+    
 
     void Visualize()
     {
@@ -602,7 +619,7 @@ public class DungeonCreator : MonoBehaviour
       
       
 
-        EntranceGenerator entranceGenerator=new EntranceGenerator(listOfRooms,type, publicSpaceDoorNumOnWall, entranceSize);
+        EntranceGenerator entranceGenerator=new EntranceGenerator(listOfRooms,type, entranceSize);
         entranceGenerator.SetEntrancePossibleList(EntranceHorizontalCandidate, EntranceVerticalCandidate);
         entranceGenerator.GenerateEntrance();
     }
@@ -629,9 +646,11 @@ public class DungeonCreator : MonoBehaviour
                 {
                     for (int y = 0; y < room.RoomGrid.GetLength(1); y++)
                     {
-                        Vector2Int worldPos = room.GridToWorldPosition(x, y, gridSize);
+                        Vector2Int worldPos = room.GridToWorldPosition(x, y, (int)unitSize);
+                        worldPos.x += (int)unitSize / 2;
+                        worldPos.y += (int)unitSize / 2;
                         Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-                        Gizmos.DrawCube(new Vector3(worldPos.x,0, worldPos.y), Vector3.one*0.9f);
+                        Gizmos.DrawCube(new Vector3(worldPos.x,0, worldPos.y), Vector3.one* (int)unitSize);
                     }
                 }
             }
@@ -641,16 +660,18 @@ public class DungeonCreator : MonoBehaviour
 
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
     {
-        roomWidthMin = Mathf.Clamp(roomWidthMin, 10, dungeonWidth);
-        roomHeightMin = Mathf.Clamp(roomHeightMin, 10, dungeonHeight);
+        dungeonWidth = Mathf.Max((int)unitSize, Mathf.RoundToInt(dungeonWidth / (int)unitSize) * (int)unitSize);
+        dungeonHeight = Mathf.Max((int)unitSize, Mathf.RoundToInt(dungeonHeight / (int)unitSize) * (int)unitSize);
+        roomWidthMin = Mathf.Max((int)unitSize, Mathf.RoundToInt(roomWidthMin / (int)unitSize) * (int)unitSize);
+        roomHeightMin = Mathf.Max((int)unitSize, Mathf.RoundToInt(roomHeightMin / (int)unitSize) * (int)unitSize);
+        publicSpaceWidth = Mathf.Max((int)unitSize, Mathf.RoundToInt(publicSpaceWidth / (int)unitSize) * (int)unitSize);
+        publicSpaceHeight = Mathf.Max((int)unitSize, Mathf.RoundToInt(publicSpaceHeight / (int)unitSize) * (int)unitSize);
+        plazaRadius = (dungeonWidth > dungeonHeight) ? Mathf.Clamp(plazaRadius, 5, dungeonHeight / 2)
+                                                     : Mathf.Clamp(plazaRadius, 5, dungeonWidth / 2);
 
-        publicSpaceWidth= Mathf.Clamp(publicSpaceWidth, roomWidthMin, dungeonWidth);
-        publicSpaceHeight = Mathf.Clamp(publicSpaceHeight, roomHeightMin, dungeonWidth);
-        publicSpaceDoorNumOnWall = (publicSpaceDoorNumOnWall < 1) ? 1 : publicSpaceDoorNumOnWall;
+      
         
-        entranceSize = (entranceSize >= roomWidthMin) ? 5 : entranceSize;
-
-        plazaRadius = (dungeonWidth > dungeonHeight) ? Mathf.Clamp(plazaRadius, 5, dungeonHeight / 2) : Mathf.Clamp(plazaRadius, 5, dungeonWidth / 2);
+  
     }
 
 

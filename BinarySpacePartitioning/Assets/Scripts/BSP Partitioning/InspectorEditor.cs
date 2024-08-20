@@ -11,15 +11,13 @@ public class DungeonCreatorEditor : Editor
     SerializedProperty roomHeightMin;
     SerializedProperty publicSpaceWidth;
     SerializedProperty publicSpaceHeight;
-    SerializedProperty publicSpaceDoorNumOnWall;
     SerializedProperty plazaRadius;
     SerializedProperty polygon;
     SerializedProperty maxIterations;
-    SerializedProperty entranceSize;
     SerializedProperty material;
     SerializedProperty wallVertical;
     SerializedProperty wallHorizontal;
-    SerializedProperty gridSize;
+    SerializedProperty unitSize;
 
     void OnEnable()
     {
@@ -30,15 +28,13 @@ public class DungeonCreatorEditor : Editor
         roomHeightMin = serializedObject.FindProperty("roomHeightMin");
         publicSpaceWidth = serializedObject.FindProperty("publicSpaceWidth");
         publicSpaceHeight = serializedObject.FindProperty("publicSpaceHeight");
-        publicSpaceDoorNumOnWall = serializedObject.FindProperty("publicSpaceDoorNumOnWall");
         plazaRadius = serializedObject.FindProperty("plazaRadius");
         polygon = serializedObject.FindProperty("polygon");
         maxIterations = serializedObject.FindProperty("maxIterations");
-        entranceSize = serializedObject.FindProperty("entranceSize");
         material = serializedObject.FindProperty("material");
         wallVertical = serializedObject.FindProperty("wallVertical");
         wallHorizontal = serializedObject.FindProperty("wallHorizontal");
-        gridSize = serializedObject.FindProperty("gridSize");
+        unitSize = serializedObject.FindProperty("unitSize");
     }
 
     public override void OnInspectorGUI()
@@ -46,6 +42,7 @@ public class DungeonCreatorEditor : Editor
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(type);
+        EditorGUILayout.PropertyField(unitSize);
         EditorGUILayout.PropertyField(dungeonWidth);
         EditorGUILayout.PropertyField(dungeonHeight);
         EditorGUILayout.PropertyField(roomWidthMin);
@@ -56,7 +53,7 @@ public class DungeonCreatorEditor : Editor
         {
             EditorGUILayout.PropertyField(publicSpaceWidth);
             EditorGUILayout.PropertyField(publicSpaceHeight);
-            EditorGUILayout.PropertyField(publicSpaceDoorNumOnWall);
+           
         }
 
         // type이 plaza가 아닌 경우 비활성화
@@ -72,8 +69,6 @@ public class DungeonCreatorEditor : Editor
             EditorGUILayout.PropertyField(maxIterations);
         }
        
-        EditorGUILayout.PropertyField(entranceSize);
-        EditorGUILayout.PropertyField(gridSize);
         EditorGUILayout.PropertyField(material);
         EditorGUILayout.PropertyField(wallHorizontal);
         EditorGUILayout.PropertyField(wallVertical);

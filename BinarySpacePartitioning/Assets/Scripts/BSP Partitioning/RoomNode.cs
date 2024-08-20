@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class RoomNode
@@ -88,12 +89,12 @@ public class RoomNode
 
         roomGrid = new int[gridWidth, gridHeight];
 
-       //기본적으로 0으로 초기화되어있지만, 벽이나 오브젝트 배치 시 초기화 필요할듯
+      
     }
 
 
     //------------좌표변환 메서드 (grid position <-> world position)-------------//
-    public Vector2Int GridToWorldPosition(int gridX, int gridY, int cellSize=1) 
+    public Vector2Int GridToWorldPosition(int gridX, int gridY, int cellSize = 1)
     {
         int worldX = BottomLeftAreaCorner.x + gridX * cellSize;
         int worldY = BottomLeftAreaCorner.y + gridY * cellSize;
@@ -108,13 +109,42 @@ public class RoomNode
     }
     //--------------------------------------------------------------------------//
 
-    public void PlaceObjectInRoom(Vector2Int gridPosition, int objectType)
+    public void PlaceObjectInRoom(Vector2Int gridPosition, Vector2Int objectSize,int cellSize ,int objectType)
     {
-        if (gridPosition.x >= 0 && gridPosition.x < roomGrid.GetLength(0) &&
-            gridPosition.y >= 0 && gridPosition.y < roomGrid.GetLength(1))
+        if (IsSpaceAvailable(gridPosition, objectSize))
         {
-            roomGrid[gridPosition.x, gridPosition.y] = objectType; // 예: 1 = 벽, 2 = 아이템 등
+           
+            for (int x = 0; x < objectSize.x; x++)
+            {
+                for (int y = 0; y < objectSize.y; y++)
+                {
+                    roomGrid[gridPosition.x + x, gridPosition.y + y] = objectType;
+                }
+            }
         }
+        else
+        {
+            Debug.LogWarning("Not enough space to place the object!");
+        }
+    }
+
+    bool IsSpaceAvailable(Vector2Int gridPosition, Vector2Int objectSize)
+    {
+     
+        for (int x = 0; x < objectSize.x; x++)
+        {
+            for (int y = 0; y < objectSize.y; y++)
+            {
+                int checkX = gridPosition.x + x;
+                int checkY = gridPosition.y + y;
+
+                if (checkX >= roomGrid.GetLength(0) || checkY >= roomGrid.GetLength(1) || roomGrid[checkX, checkY] != 0)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

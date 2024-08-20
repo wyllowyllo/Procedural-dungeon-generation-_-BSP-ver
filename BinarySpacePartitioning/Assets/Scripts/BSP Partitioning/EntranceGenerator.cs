@@ -14,13 +14,12 @@ public class EntranceGenerator
     List<Vector2Int> EntranceVerticalPos;
     
 
-    int publicSpaceDoorNumOnWall;
+    
     int entranceSize;
    
-    public EntranceGenerator(List<RoomNode> listOfRooms,PUBLICSPACE type, int publicSpaceDoorNumOnWall, int entranceSize)
+    public EntranceGenerator(List<RoomNode> listOfRooms,PUBLICSPACE type, int entranceSize)
     {
         this.listOfRooms = listOfRooms;
-        this.publicSpaceDoorNumOnWall = publicSpaceDoorNumOnWall;
         this.type = type;
         this.entranceSize = entranceSize;
 
@@ -74,12 +73,15 @@ public class EntranceGenerator
 
             }
 
-
-            //문 생성
-            Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
-            Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
-            //DrawLine(Orientation.Horizontal, entranceCoordinate);
-            DrawLine(Orientation.Vertical, door);
+            if (pointList.Count > 0)
+            {
+                //문 생성
+                Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+                Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
+                //DrawLine(Orientation.Horizontal, entranceCoordinate);
+                DrawLine(Orientation.Vertical, door);
+            }
+           
         }
 
 
@@ -112,10 +114,14 @@ public class EntranceGenerator
             }
 
             //문 생성
-            Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
-            Door door=ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
-            //DrawLine(Orientation.Vertical, entranceCoordinate);
-            DrawLine(Orientation.Vertical, door);
+            if (pointList.Count > 0)
+            {
+                Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
+                Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
+                //DrawLine(Orientation.Vertical, entranceCoordinate);
+                DrawLine(Orientation.Vertical, door);
+            }
+           
 
         }
 

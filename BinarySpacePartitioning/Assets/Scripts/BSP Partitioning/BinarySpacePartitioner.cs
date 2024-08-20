@@ -5,13 +5,14 @@ using Random = UnityEngine.Random;
 public class BinarySpacePartitioner
 {
     RoomNode rootNode;
-    private int dungeonWidth;
-    private int dungeonHeight;
+    int unitSize;
+
 
     public RoomNode RootNode { get => rootNode; }
-    public BinarySpacePartitioner(Vector2Int startPoint,int dungeonWidth, int dungeonHeight)
+    public BinarySpacePartitioner(Vector2Int startPoint,int dungeonWidth, int dungeonHeight, int unitSize)
     {
         this.rootNode = new RoomNode(startPoint, new Vector2Int(startPoint.x+dungeonWidth, startPoint.y+dungeonHeight), null, 0);
+        this.unitSize = unitSize;
     }
 
     public List<RoomNode> PrepareNodesCollection(int maxIterations, int roomWidthMin, int roomHeightMin, PUBLICSPACE type)
@@ -133,23 +134,35 @@ public class BinarySpacePartitioner
         //방향에 따라 생성할 구획 좌표값 설정 
         if (orientation == Orientation.Horizontal)
         {
-            coordinates = new Vector2Int(
-                0,
-                Random.Range(
+            int y_value = Random.Range(
                     (bottomLeftAreaCorner.y + roomHeightMin), // 최소 크기의 방이 들어갈 수 있는 정도로 구획 나눔
-                    (topRightAreaCorner.y - roomHeightMin)
-                ));
+                    (topRightAreaCorner.y - roomHeightMin));
+            y_value = Mathf.RoundToInt(y_value / unitSize) * unitSize; //유닛 사이즈의 배수로 설정
+
+            //재조정
+            y_value = (y_value < (bottomLeftAreaCorner.y + roomHeightMin)) ? (bottomLeftAreaCorner.y + roomHeightMin) : y_value;
+            y_value = (y_value > (topRightAreaCorner.y - roomHeightMin)) ? (topRightAreaCorner.y - roomHeightMin) : y_value;
+
+            
+            coordinates = new Vector2Int(0,y_value);
         }
         else
         {
-            coordinates = new Vector2Int(
-                Random.Range(
+            int x_value = Random.Range(
                     (bottomLeftAreaCorner.x + roomWidthMin),
-                    (topRightAreaCorner.x - roomWidthMin)
-                )
-                ,0);
+                    (topRightAreaCorner.x - roomWidthMin));
+            x_value = Mathf.RoundToInt(x_value / unitSize) * unitSize; //유닛 사이즈의 배수로 설정
+
+            //재조정
+            x_value = (x_value < (bottomLeftAreaCorner.x + roomWidthMin)) ? (bottomLeftAreaCorner.x + roomWidthMin) : x_value;
+            x_value = (x_value > (topRightAreaCorner.x - roomWidthMin)) ? (topRightAreaCorner.x - roomWidthMin) : x_value;
+           
+
+            coordinates = new Vector2Int(x_value, 0);
+               
         }
 
         return coordinates;
     }
+    
 }
