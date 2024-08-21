@@ -9,7 +9,7 @@ public class Wall
    
     int length;
     int unitSize;
-    List<Vector3> wallObjPoint=new List<Vector3>();
+    List<Vector2Int> wallObjPoint=new List<Vector2Int>(); //벽 오브젝트를 놓을 위치(중앙점)
     List<Door> doors= new List<Door>();
 
     public Wall(Vector2Int leftVertex, Vector2Int rightVertex, int unitSize)
@@ -27,6 +27,7 @@ public class Wall
     public Vector2Int RightVertex { get => rightVertex; }
     public Orientation Orientation { get => orientation; }
     public int Length { get => length; }
+   
 
     void SetWallObjList()
     {
@@ -44,15 +45,19 @@ public class Wall
             else
             {
                 LeftV = new Vector2Int(LeftVertex.x, leftVertex.y - (i * unitSize));
-                RightV = new Vector2Int(LeftV.x, LeftV.y+unitSize);
+                RightV = new Vector2Int(LeftV.x, LeftV.y-unitSize);
             }
 
             centerV = SetCenterPoint(LeftV, RightV);
-            wallObjPoint.Add(new Vector3(centerV.x, 0, centerV.y));
+            wallObjPoint.Add(centerV);
         }
 
        
        
+    }
+    public List<Vector2Int> GetWallObjPoints()
+    {
+        return wallObjPoint;
     }
     Vector2Int SetCenterPoint(Vector2Int leftV, Vector2Int RightV)
     {

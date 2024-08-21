@@ -52,11 +52,13 @@ public class DungeonCreator : MonoBehaviour
     public Material material; // For Visualizing
     public GameObject wallVertical, wallHorizontal;
 
-    int entranceSize; //문 너비
+    
     List<Vector2Int> WallHorizontalPos; //가로 벽 좌표값 전체
     List<Vector2Int> WallVerticalPos; // 세로 벽 좌표값 전체
     List<Vector2Int> EntranceHorizontalCandidate; //방문 생성 가능한 가로 벽 좌표(방과 방이 공유하는 선)
     List<Vector2Int> EntranceVerticalCandidate;//방문 생성 가능한 세로 벽 좌표(방과 방이 공유하는 선)
+    List<Vector2Int> InnerWallHorizontalPos;
+    List<Vector2Int> InnerWallVerticalPos;
 
     List<RoomNode> listOfRooms=new List<RoomNode>();
     RoomNode Ground;
@@ -64,7 +66,7 @@ public class DungeonCreator : MonoBehaviour
 
     private void Awake()
     {
-        entranceSize = 10;
+        
 
         if (type == PUBLICSPACE.none)
             return;
@@ -116,7 +118,7 @@ public class DungeonCreator : MonoBehaviour
     {
         CreateDungeon();
         CreateEntrance();
-
+        VisualizeWall();
     }
 
    
@@ -514,50 +516,22 @@ public class DungeonCreator : MonoBehaviour
         dungeonFloor.GetComponent<MeshFilter>().mesh = mesh;
         dungeonFloor.GetComponent<MeshRenderer>().material = material;
 
-        //OutLine
-        LineRenderer line=dungeonFloor.AddComponent<LineRenderer>();
-        line.positionCount = 5;
-        line.enabled = false;
 
-        line.SetPosition(0, vertices[0]);
-        line.SetPosition(1, vertices[1]);
-        line.SetPosition(2, vertices[3]);
-        line.SetPosition(3, vertices[2]);
-        line.SetPosition(4, vertices[0]);
-
-
-        line.enabled = true;
 
     }
     void CreateWallPosList(RoomNode roomNode)
     {
-        Vector2Int bottomLeftV = roomNode.BottomLeftAreaCorner;
-        Vector2Int bottomRightV = roomNode.BottomRightAreaCorner;
-        Vector2Int topLeftV = roomNode.TopLeftAreaCorner;
-        Vector2Int topRightV = roomNode.TopRightAreaCorner;
-      
+       
+        List<Wall> wallList=roomNode.WallList; //왼쪽 벽-오른쪽 벽-아래 벽-위 벽 순서
 
-        for (int row = (int)bottomLeftV.x; row < (int)bottomRightV.x; row++)
-         {
-             var wallPosition = new Vector2Int(row, bottomLeftV.y);
-             AddWallPosToList(wallPosition, WallHorizontalPos, EntranceHorizontalCandidate);
-         }
-         for (int row = (int)topLeftV.x; row < (int)topRightV.x; row++)
-         {
-             var wallPosition = new Vector2Int(row, topLeftV.y);
-            AddWallPosToList(wallPosition, WallHorizontalPos, EntranceHorizontalCandidate);
-         }
-         for (int col = (int)bottomLeftV.y; col < (int)topLeftV.y; col++)
-         {
-             var wallPosition = new Vector2Int(bottomLeftV.x, col);
-            AddWallPosToList(wallPosition, WallVerticalPos,EntranceVerticalCandidate);
-         }
-         for (int col = (int)bottomRightV.y; col < (int)topRightV.y; col++)
-         {
-            var wallPosition = new Vector2Int(bottomRightV.x, col);
-            AddWallPosToList(wallPosition, WallVerticalPos, EntranceVerticalCandidate);
-         }
-
+        foreach(var point in wallList[0].GetWallObjPoints())
+            AddWallPosToList(point, WallVerticalPos, EntranceVerticalCandidate);
+        foreach (var point in wallList[1].GetWallObjPoints())
+            AddWallPosToList(point, WallVerticalPos, EntranceVerticalCandidate);
+        foreach (var point in wallList[2].GetWallObjPoints())
+            AddWallPosToList(point, WallHorizontalPos, EntranceHorizontalCandidate);
+        foreach (var point in wallList[3].GetWallObjPoints())
+            AddWallPosToList(point, WallHorizontalPos, EntranceHorizontalCandidate);
     }
     private void AddWallPosToList(Vector2Int wallPosition, List<Vector2Int> wallList, List<Vector2Int> doorCandidnate)
     {
@@ -618,12 +592,52 @@ public class DungeonCreator : MonoBehaviour
         foreach (var room in listOfRooms)
             CreateWallPosList(room);
 
-      
-      
+        //외벽 제외한 벽들
+        // 깊은 복사 (Deep Copy)
+        InnerWallHorizontalPos = new List<Vector2Int>(EntranceHorizontalCandidate);
+        InnerWallVerticalPos = new List<Vector2Int>(EntranceVerticalCandidate);
 
-        EntranceGenerator entranceGenerator=new EntranceGenerator(listOfRooms,type, entranceSize);
+
+        EntranceGenerator entranceGenerator =new EntranceGenerator(listOfRooms,type, (int)unitSize);
         entranceGenerator.SetEntrancePossibleList(EntranceHorizontalCandidate, EntranceVerticalCandidate);
         entranceGenerator.GenerateEntrance();
+
+        //통로 생성될 위치에 벽 제거
+        List<Vector2Int> doorPos = entranceGenerator.GetEntrancePos();
+        foreach(var door in doorPos)
+        {
+            InnerWallHorizontalPos.Remove(door);
+            InnerWallVerticalPos.Remove(door);
+        }
+
+    }
+    void VisualizeWall()
+    {
+        foreach(var point in WallHorizontalPos)
+        {
+            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation);
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        }
+        foreach (var point in WallVerticalPos)
+        {
+            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation);
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        }
+
+
+        foreach (var point in InnerWallHorizontalPos)
+        {
+            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation);
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+
+
+        }
+        foreach (var point in InnerWallVerticalPos)
+        {
+            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation);
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        }
+
     }
 
     void SetRoomName()
