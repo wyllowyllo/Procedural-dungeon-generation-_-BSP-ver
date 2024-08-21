@@ -37,7 +37,7 @@ public class RoomNode
             parentNode.AddChild(this);
         }
 
-        SetWall(bottomLeftAreaCorner,BottomRightAreaCorner,topRightAreaCorner,TopLeftAreaCorner);
+       
     }
     
     
@@ -61,12 +61,12 @@ public class RoomNode
     int[,] roomGrid;
     public int[,] RoomGrid { get => roomGrid;}
 
-    private void SetWall(Vector2Int leftBottomV, Vector2Int rightBottomV,Vector2Int rightTopV, Vector2Int leftTopV)
+    public void SetWall(int unitSize=5)
     {
-        leftWall=new Wall(leftTopV, leftBottomV);
-        rightWall = new Wall(rightTopV, rightBottomV);
-        bottomWall = new Wall(leftBottomV, rightBottomV);
-        topWall = new Wall(leftTopV, rightTopV);
+        leftWall=new Wall(TopLeftAreaCorner, BottomLeftAreaCorner, unitSize);
+        rightWall = new Wall(TopRightAreaCorner, BottomRightAreaCorner,unitSize);
+        bottomWall = new Wall(BottomLeftAreaCorner, BottomRightAreaCorner, unitSize);
+        topWall = new Wall(TopLeftAreaCorner, TopRightAreaCorner, unitSize);
 
         wallList.Add(leftWall);
         wallList.Add(rightWall);
@@ -81,11 +81,11 @@ public class RoomNode
     }*/
     //public Wall GetDivideLine() { return divideLine; }
 
-    public void SetGrid(int cellSize = 1)
+    public void SetGrid(int unitSize = 5)
     {
         // 셀 크기에 따라 그리드 배열 크기 결정
-        int gridWidth = Width / cellSize;
-        int gridHeight = Height / cellSize;
+        int gridWidth = Width / unitSize;
+        int gridHeight = Height / unitSize;
 
         roomGrid = new int[gridWidth, gridHeight];
 
@@ -94,22 +94,22 @@ public class RoomNode
 
 
     //------------좌표변환 메서드 (grid position <-> world position)-------------//
-    public Vector2Int GridToWorldPosition(int gridX, int gridY, int cellSize = 1)
+    public Vector2Int GridToWorldPosition(int gridX, int gridY, int unitSize = 5)
     {
-        int worldX = BottomLeftAreaCorner.x + gridX * cellSize;
-        int worldY = BottomLeftAreaCorner.y + gridY * cellSize;
+        int worldX = BottomLeftAreaCorner.x + gridX * unitSize;
+        int worldY = BottomLeftAreaCorner.y + gridY * unitSize;
         return new Vector2Int(worldX, worldY);
     }
 
-    public Vector2Int WorldToGridPosition(Vector2Int worldPosition, int cellSize=1)
+    public Vector2Int WorldToGridPosition(Vector2Int worldPosition, int unitSize = 5)
     {
-        int gridX = (worldPosition.x - BottomLeftAreaCorner.x) / cellSize;
-        int gridY = (worldPosition.y - BottomLeftAreaCorner.y) / cellSize;
+        int gridX = (worldPosition.x - BottomLeftAreaCorner.x) / unitSize;
+        int gridY = (worldPosition.y - BottomLeftAreaCorner.y) / unitSize;
         return new Vector2Int(gridX, gridY);
     }
     //--------------------------------------------------------------------------//
 
-    public void PlaceObjectInRoom(Vector2Int gridPosition, Vector2Int objectSize,int cellSize ,int objectType)
+    public void PlaceObjectInRoom(Vector2Int gridPosition, Vector2Int objectSize,int unitSize, int objectType)
     {
         if (IsSpaceAvailable(gridPosition, objectSize))
         {

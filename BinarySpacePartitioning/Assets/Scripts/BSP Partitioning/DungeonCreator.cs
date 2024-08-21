@@ -138,6 +138,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "LivingRoom";
+                listOfRooms[0].SetWall((int)unitSize);
                 listOfRooms[0].SetGrid((int)unitSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
@@ -155,6 +156,7 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "CenterRoom";
+                listOfRooms[0].SetWall((int)unitSize);
                 listOfRooms[0].SetGrid((int)unitSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
@@ -668,10 +670,6 @@ public class DungeonCreator : MonoBehaviour
         publicSpaceHeight = Mathf.Max((int)unitSize, Mathf.RoundToInt(publicSpaceHeight / (int)unitSize) * (int)unitSize);
         plazaRadius = (dungeonWidth > dungeonHeight) ? Mathf.Clamp(plazaRadius, 5, dungeonHeight / 2)
                                                      : Mathf.Clamp(plazaRadius, 5, dungeonWidth / 2);
-
-      
-        
-  
     }
 
 
