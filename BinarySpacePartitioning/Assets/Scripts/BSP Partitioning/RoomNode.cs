@@ -54,9 +54,6 @@ public class RoomNode
     public List<Wall> WallList { get => wallList; }
     
 
-    //구분선
-    Wall divideLine;
-
     //Grid배열
     int[,] roomGrid;
     public int[,] RoomGrid { get => roomGrid;}
@@ -74,12 +71,8 @@ public class RoomNode
         wallList.Add(topWall);
     }
    
-    /*public void SetDivideLine(Vector2Int leftPoint, Vector2Int rightPoint)
-    {
-        divideLine=new Wall(leftPoint, rightPoint);
-       
-    }*/
-    //public Wall GetDivideLine() { return divideLine; }
+   
+   
 
     public void SetGrid(int unitSize = 5)
     {

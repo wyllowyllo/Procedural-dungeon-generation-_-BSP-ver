@@ -248,14 +248,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   unitSize: 5
-  dungeonWidth: 150
-  dungeonHeight: 100
+  dungeonWidth: 200
+  dungeonHeight: 200
   roomWidthMin: 30
-  roomHeightMin: 50
-  publicSpaceWidth: 200
-  publicSpaceHeight: 200
-  plazaRadius: 5
-  polygon: 20
+  roomHeightMin: 40
+  publicSpaceWidth: 140
+  publicSpaceHeight: 140
+  plazaRadius: 75
+  polygon: 11
   maxIterations: 20
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
   wallVertical: {fileID: 1380684159269207902, guid: 2532ea0f42bf98646b5d52b2a569d0d9, type: 3}

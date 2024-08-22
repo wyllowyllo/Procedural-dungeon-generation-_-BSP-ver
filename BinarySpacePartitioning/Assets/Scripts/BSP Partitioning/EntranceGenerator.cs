@@ -12,18 +12,23 @@ public class EntranceGenerator
     List<RoomNode> listOfRooms;
     List<Vector2Int> EntranceHorizontalPos;
     List<Vector2Int> EntranceVerticalPos;
-    List<Vector2Int> CreatedEntrancePos; //실제 생성 완료된 통로 위치 저장
-    
+    List<Door> CreatedEntranceList; //실제 생성 완료된 통로 위치 저장
+
+    //생성할 통로 오브젝트
+    GameObject doorHorizontalObj; 
+    GameObject doorVerticalObj;
 
     
     int entranceSize;
    
-    public EntranceGenerator(List<RoomNode> listOfRooms,PUBLICSPACE type, int unitSize)
+    public EntranceGenerator(List<RoomNode> listOfRooms,PUBLICSPACE type, int unitSize, GameObject doorHorizontalObj, GameObject doorVerticalObj)
     {
         this.listOfRooms = listOfRooms;
         this.type = type;
         this.entranceSize = unitSize;
 
+        this.doorHorizontalObj = doorHorizontalObj;
+        this.doorVerticalObj = doorVerticalObj;
     }
     public void SetEntrancePossibleList(List<Vector2Int> entranceHPos, List<Vector2Int> entranceVList)
     {
@@ -42,7 +47,7 @@ public class EntranceGenerator
 
     void GenerateEntranceLogic() 
     {
-        CreatedEntrancePos = new List<Vector2Int>();
+        CreatedEntranceList = new List<Door>();
         List<Vector2Int> prevPoint = new List<Vector2Int>();
 
         //통로 생성 가능한 가로 벽면 하나당 1개의 문 생성
@@ -78,10 +83,11 @@ public class EntranceGenerator
             if (pointList.Count > 0)
             {
                 //문 생성
+                //TODO: 랜덤함수 활용해서 문 생성확률 설정할수 있게 하고, 이후 방 조사해서 출입구 없는 방은 통로 1개 따로 생성하도록 하기
                 Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
                 Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Horizontal);
-                CreatedEntrancePos.Add(entranceCoordinate);
-                //TODO:문 객체 생성하기
+                CreatedEntranceList.Add(door);
+               
                 
             }
            
@@ -121,8 +127,7 @@ public class EntranceGenerator
             {
                 Vector2Int entranceCoordinate = pointList[Random.Range(0, pointList.Count)];
                 Door door = ConnectWallAndDoorInfo(entranceCoordinate, Orientation.Vertical);
-                CreatedEntrancePos.Add(entranceCoordinate);
-                //TODO:문 객체 생성하기
+                CreatedEntranceList.Add(door);
             }
 
 
@@ -174,53 +179,18 @@ public class EntranceGenerator
     }
 
     
-    void DrawLine(Orientation ori,Door door)
-    {
-        //OutLine
-        GameObject doorLine = new GameObject("Door  " + (door.ParentRooms[0].roomName)+"-"+(door.ParentRooms[1].roomName));
-
-        doorLine.transform.position = Vector3.zero;
-        doorLine.transform.localScale = Vector3.one;
-
-
-        LineRenderer lineDoor = doorLine.AddComponent<LineRenderer>();
-        lineDoor.positionCount = 2;
-        lineDoor.startColor = Color.green;
-        lineDoor.endColor = Color.green;
-        lineDoor.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-        lineDoor.sortingOrder = 1;
-
-        lineDoor.enabled = false;
-
-        if (ori == Orientation.Horizontal)
-        {
-            lineDoor.SetPosition(0, new Vector3(door.DoorLeftPoint.x, 2, door.DoorLeftPoint.y));
-            lineDoor.SetPosition(1, new Vector3(door.DoorRightPoint.x + entranceSize, 2, door.DoorRightPoint.y));
-        }
-        else
-        {
-            lineDoor.SetPosition(0, new Vector3(door.DoorRightPoint.x, 2, door.DoorRightPoint.y));
-            lineDoor.SetPosition(1, new Vector3(door.DoorLeftPoint.x, 2, door.DoorLeftPoint.y));
-        }
-
-
-        lineDoor.enabled = true;
-    }
+   
 
     bool IsOnVertex(Vector2Int newDoor, Vector2Int vertex, Orientation ori)
     {
         bool onVertex = false;
         if (ori == Orientation.Horizontal)
         {
-            /*if ((newDoor.x <= vertex.x && newDoor.y == vertex.y) && (vertex.x <= newDoor.x + entranceSize && newDoor.y == vertex.y))
-                onVertex = true;*/
             if(IsWithinRange(vertex.x, newDoor.x-entranceSize/2, newDoor.x+entranceSize/2)&& vertex.y==newDoor.y)
                 onVertex = true;
         }
         else
         {
-            /* if ((newDoor.y <= vertex.y && newDoor.x == vertex.x) && (vertex.y <= newDoor.y + entranceSize && newDoor.x == vertex.x))
-                 onVertex = true;*/
             if (IsWithinRange(vertex.y, newDoor.y - entranceSize / 2, newDoor.y + entranceSize / 2) && vertex.x == newDoor.x)
                 onVertex = true;
         }
@@ -229,7 +199,7 @@ public class EntranceGenerator
     }
     bool IsWithinRange(int value, int min, int max)
     {
-        return value >= min && value <= max;
+        return value > min && value < max;
     }
 
     void MakepossibleEntrancePos()
@@ -295,8 +265,8 @@ public class EntranceGenerator
         return OnSameLine;
     }
 
-    public List<Vector2Int> GetEntrancePos()
+    public List<Door> GetEntrancePos()
     {
-        return CreatedEntrancePos;
+        return CreatedEntranceList;
     }
 }

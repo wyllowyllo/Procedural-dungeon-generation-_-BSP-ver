@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 using Color = UnityEngine.Color;
 using System;
 
-public enum UNITSIZE { SIZE_5=5, SIZE_10 = 10}
+public enum UNITSIZE { SIZE_5=5, SIZE_10 = 10, SIZE_20 = 20 }
 public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
@@ -118,10 +118,11 @@ public class DungeonCreator : MonoBehaviour
     {
         CreateDungeon();
         CreateEntrance();
-        VisualizeWall();
+        InstantiateWall();
+
     }
 
-   
+
     public void CreateDungeon()
     {
         List<RoomNode> rootList;
@@ -174,6 +175,8 @@ public class DungeonCreator : MonoBehaviour
                 rootList = SplitTheSpace(type);
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "Plaza";
+                listOfRooms[0].SetWall((int)unitSize);
+                listOfRooms[0].SetGrid((int)unitSize);
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -429,9 +432,10 @@ public class DungeonCreator : MonoBehaviour
     {
         SetRoomName();
 
+        GameObject roomGroup = new GameObject("roomGroup");
         for (int i = 0; i < listOfRooms.Count; i++)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName);
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName, roomGroup.transform);
         }
     }
     private void VisualizeForPlaza()
@@ -466,13 +470,14 @@ public class DungeonCreator : MonoBehaviour
 
 
         // 공용공간 외 나머지 방들
+        GameObject roomGroup = new GameObject("roomGroup");
         for (int i = 1; i < listOfRooms.Count; i++)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName);
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].roomName, roomGroup.transform);
         }
     }
 
-    void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner, string roomName)
+    void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner, string roomName, Transform objParent)
     {
         Vector3 bottomLeftV = new Vector3(bottomLeftCorner.x, 0, bottomLeftCorner.y);
         Vector3 bottomRightV=new Vector3(topRightCorner.x,0,bottomLeftCorner.y);
@@ -513,6 +518,7 @@ public class DungeonCreator : MonoBehaviour
 
         dungeonFloor.transform.position= Vector3.zero;
         dungeonFloor.transform.localScale= Vector3.one;
+        dungeonFloor.transform.parent = objParent;
         dungeonFloor.GetComponent<MeshFilter>().mesh = mesh;
         dungeonFloor.GetComponent<MeshRenderer>().material = material;
 
@@ -539,6 +545,7 @@ public class DungeonCreator : MonoBehaviour
 
         if (wallList.Contains(point))
         {
+            //TODO: 만약 해당 좌표가 공용공간 벽에 해당된다면 추가하지 않고 따로 통로 생성해서 공용공간 통로 수 조절하기
             wallList.Remove(point);
             doorCandidnate.Add(point);
         }
@@ -598,43 +605,68 @@ public class DungeonCreator : MonoBehaviour
         InnerWallVerticalPos = new List<Vector2Int>(EntranceVerticalCandidate);
 
 
-        EntranceGenerator entranceGenerator =new EntranceGenerator(listOfRooms,type, (int)unitSize);
+        EntranceGenerator entranceGenerator =new EntranceGenerator(listOfRooms,type, (int)unitSize, wallHorizontal, wallVertical);
         entranceGenerator.SetEntrancePossibleList(EntranceHorizontalCandidate, EntranceVerticalCandidate);
         entranceGenerator.GenerateEntrance();
 
         //통로 생성될 위치에 벽 제거
-        List<Vector2Int> doorPos = entranceGenerator.GetEntrancePos();
-        foreach(var door in doorPos)
+        List<Door> doorList = entranceGenerator.GetEntrancePos();
+        foreach(var door in doorList)
         {
-            InnerWallHorizontalPos.Remove(door);
-            InnerWallVerticalPos.Remove(door);
+            InnerWallHorizontalPos.Remove(door.DoorPosition);
+            InnerWallVerticalPos.Remove(door.DoorPosition);
         }
 
+        //벽 오브젝트 Instantiate;
+        GameObject entranceGroup = new GameObject("entranceGroup");
+        foreach(var door in doorList)
+        {
+            if (door.DoorOrientation == Orientation.Horizontal)
+            {
+                GameObject doorObj = Instantiate(wallHorizontal, new Vector3(door.DoorPosition.x, 5, door.DoorPosition.y), wallHorizontal.transform.rotation, entranceGroup.transform);
+                doorObj.GetComponent<Renderer>().material.color = Color.red;
+                doorObj.transform.localScale = new Vector3((int)unitSize, 10,1);
+            }
+            else
+            {
+                GameObject doorObj = Instantiate(wallVertical, new Vector3(door.DoorPosition.x, 5, door.DoorPosition.y), wallVertical.transform.rotation, entranceGroup.transform);
+                doorObj.GetComponent<Renderer>().material.color = Color.red;
+                doorObj.transform.localScale = new Vector3(1, 10, (int)unitSize);
+            }
+        }
+        
+
+
     }
-    void VisualizeWall()
+    void InstantiateWall()
     {
+        //unitSize에 맞게 프리펩 크기조정
+        wallHorizontal.transform.localScale = new Vector3((int)unitSize,10,1);
+        wallVertical.transform.localScale = new Vector3(1, 10, (int)unitSize);
+
+        GameObject wallGroup = new GameObject("wallGroup");
         foreach(var point in WallHorizontalPos)
         {
-            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation);
+            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
             gameObject.GetComponent<Renderer>().material.color = Color.white;
         }
         foreach (var point in WallVerticalPos)
         {
-            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation);
+            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation, wallGroup.transform);
             gameObject.GetComponent<Renderer>().material.color = Color.white;
         }
 
 
         foreach (var point in InnerWallHorizontalPos)
         {
-            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation);
+            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
             gameObject.GetComponent<Renderer>().material.color = Color.white;
 
 
         }
         foreach (var point in InnerWallVerticalPos)
         {
-            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation);
+            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation, wallGroup.transform);
             gameObject.GetComponent<Renderer>().material.color = Color.white;
         }
 
