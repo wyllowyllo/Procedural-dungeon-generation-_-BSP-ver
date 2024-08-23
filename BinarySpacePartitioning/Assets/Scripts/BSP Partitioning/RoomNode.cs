@@ -54,9 +54,7 @@ public class RoomNode
     public List<Wall> WallList { get => wallList; }
     
 
-    //Grid배열
-    int[,] roomGrid;
-    public int[,] RoomGrid { get => roomGrid;}
+    
 
     public void SetWall(int unitSize=5)
     {
@@ -72,37 +70,8 @@ public class RoomNode
     }
    
    
-   
 
-    public void SetGrid(int unitSize = 5)
-    {
-        // 셀 크기에 따라 그리드 배열 크기 결정
-        int gridWidth = Width / unitSize;
-        int gridHeight = Height / unitSize;
-
-        roomGrid = new int[gridWidth, gridHeight];
-
-      
-    }
-
-
-    //------------좌표변환 메서드 (grid position <-> world position)-------------//
-    public Vector2Int GridToWorldPosition(int gridX, int gridY, int unitSize = 5)
-    {
-        int worldX = BottomLeftAreaCorner.x + gridX * unitSize;
-        int worldY = BottomLeftAreaCorner.y + gridY * unitSize;
-        return new Vector2Int(worldX, worldY);
-    }
-
-    public Vector2Int WorldToGridPosition(Vector2Int worldPosition, int unitSize = 5)
-    {
-        int gridX = (worldPosition.x - BottomLeftAreaCorner.x) / unitSize;
-        int gridY = (worldPosition.y - BottomLeftAreaCorner.y) / unitSize;
-        return new Vector2Int(gridX, gridY);
-    }
-    //--------------------------------------------------------------------------//
-
-    public void PlaceObjectInRoom(Vector2Int gridPosition, Vector2Int objectSize,int unitSize, int objectType)
+   /* public void PlaceObjectInRoom(Vector2Int gridPosition, Vector2Int objectSize,int unitSize, int objectType)
     {
         if (IsSpaceAvailable(gridPosition, objectSize))
         {
@@ -138,7 +107,7 @@ public class RoomNode
             }
         }
         return true;
-    }
+    }*/
 
 
 

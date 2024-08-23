@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 using Color = UnityEngine.Color;
 using System;
 
-public enum UNITSIZE { SIZE_5=5, SIZE_10 = 10, SIZE_20 = 20 }
+public enum UNITSIZE {SIZE_1=1, SIZE_5=5, SIZE_10 = 10, SIZE_20 = 20 }
 public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
@@ -59,8 +59,11 @@ public class DungeonCreator : MonoBehaviour
     List<Vector2Int> EntranceVerticalCandidate;//방문 생성 가능한 세로 벽 좌표(방과 방이 공유하는 선)
     List<Vector2Int> InnerWallHorizontalPos;
     List<Vector2Int> InnerWallVerticalPos;
+   
 
     List<RoomNode> listOfRooms=new List<RoomNode>();
+    List<Door> listOfDoors;
+    gridTile[,] tileMap;
     RoomNode Ground;
 
 
@@ -119,9 +122,11 @@ public class DungeonCreator : MonoBehaviour
         CreateDungeon();
         CreateEntrance();
         InstantiateWall();
-
+        CreateGrid();
+       
     }
 
+  
 
     public void CreateDungeon()
     {
@@ -142,7 +147,7 @@ public class DungeonCreator : MonoBehaviour
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "LivingRoom";
                 listOfRooms[0].SetWall((int)unitSize);
-                listOfRooms[0].SetGrid((int)unitSize);
+               
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -160,7 +165,7 @@ public class DungeonCreator : MonoBehaviour
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "CenterRoom";
                 listOfRooms[0].SetWall((int)unitSize);
-                listOfRooms[0].SetGrid((int)unitSize);
+               
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -176,7 +181,7 @@ public class DungeonCreator : MonoBehaviour
                 listOfRooms.Add(rootList[0]);
                 listOfRooms[0].roomName = "Plaza";
                 listOfRooms[0].SetWall((int)unitSize);
-                listOfRooms[0].SetGrid((int)unitSize);
+               
 
                 //공용공간(0번 인덱스) 제외하고 분할 시작
                 for (int i = 1; i < rootList.Count; i++)
@@ -610,8 +615,8 @@ public class DungeonCreator : MonoBehaviour
         entranceGenerator.GenerateEntrance();
 
         //통로 생성될 위치에 벽 제거
-        List<Door> doorList = entranceGenerator.GetEntrancePos();
-        foreach(var door in doorList)
+        listOfDoors = entranceGenerator.GetEntrancePos();
+        foreach(var door in listOfDoors)
         {
             InnerWallHorizontalPos.Remove(door.DoorPosition);
             InnerWallVerticalPos.Remove(door.DoorPosition);
@@ -619,7 +624,7 @@ public class DungeonCreator : MonoBehaviour
 
         //벽 오브젝트 Instantiate;
         GameObject entranceGroup = new GameObject("entranceGroup");
-        foreach(var door in doorList)
+        foreach(var door in listOfDoors)
         {
             if (door.DoorOrientation == Orientation.Horizontal)
             {
@@ -672,6 +677,28 @@ public class DungeonCreator : MonoBehaviour
 
     }
 
+    private void CreateGrid()
+    {
+        GridManager gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
+        tileMap = gridManager.DungeonGrid;
+
+        List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(9,0));
+
+        if (path != null)
+        {
+            foreach (var dot in path)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.position = new Vector3(dot.x, 5, dot.y);
+            }
+        }
+        else
+        {
+            Debug.Log("가능한 경로가 없습니다");
+        }
+       
+    }
+
     void SetRoomName()
     {
         int idx = 0;
@@ -686,26 +713,25 @@ public class DungeonCreator : MonoBehaviour
     
     void OnDrawGizmos()
     {
-        foreach(var room in listOfRooms)
+       
+
+        if (tileMap != null)
         {
-            if (room.RoomGrid != null)
+            for (int x = 0; x < tileMap.GetLength(0); x++)
             {
-                for (int x = 0; x < room.RoomGrid.GetLength(0); x++)
+                for (int y = 0; y < tileMap.GetLength(1); y++)
                 {
-                    for (int y = 0; y < room.RoomGrid.GetLength(1); y++)
-                    {
-                        Vector2Int worldPos = room.GridToWorldPosition(x, y, (int)unitSize);
-                        worldPos.x += (int)unitSize / 2;
-                        worldPos.y += (int)unitSize / 2;
-                        Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-                        Gizmos.DrawCube(new Vector3(worldPos.x,0, worldPos.y), Vector3.one* (int)unitSize);
-                    }
+                    Vector2Int worldPos = tileMap[x,y].CenterPoint;
+                    Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
+                    Gizmos.DrawCube(new Vector3(worldPos.x, 0, worldPos.y), Vector3.one * (int)unitSize);
+                   
                 }
             }
         }
-        
+
     }
 
+  
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
     {
         dungeonWidth = Mathf.Max((int)unitSize, Mathf.RoundToInt(dungeonWidth / (int)unitSize) * (int)unitSize);

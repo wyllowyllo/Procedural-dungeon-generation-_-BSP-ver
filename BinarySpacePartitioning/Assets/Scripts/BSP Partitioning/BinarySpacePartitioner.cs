@@ -22,7 +22,7 @@ public class BinarySpacePartitioner
         graph.Enqueue(rootNode); //순차 방문하여 Split하기 위함
         listToReturn.Add(rootNode); //전체 Room Tree
 
-        if(type==PUBLICSPACE.none)
+        if(type==PUBLICSPACE.none) 
         {
             int i = 0;
 

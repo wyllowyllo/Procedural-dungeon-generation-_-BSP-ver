@@ -24,7 +24,7 @@ internal class DungeonGenerator
         RoomNode rootNode = allSpaceNodes[0];
 
         List<RoomNode> roomSpaces = FindLeafes(rootNode); //반환값은 리프노드 전체
-        SetWallAndGridOfRoomNode(roomSpaces); //모든 방마다 벽과 그리드 가질 수 있게 설정
+        SetWallOfRoomNode(roomSpaces); //모든 방마다 벽과 그리드 가질 수 있게 설정
 
         return roomSpaces;
     }
@@ -61,13 +61,13 @@ internal class DungeonGenerator
         return listToReturn;
     }
 
-    void SetWallAndGridOfRoomNode(List<RoomNode> roomSpaces)
+    void SetWallOfRoomNode(List<RoomNode> roomSpaces)
     {
        
         foreach (RoomNode roomNode in roomSpaces)
         {
             roomNode.SetWall(unitSize);
-            roomNode.SetGrid(unitSize);
+            
         }
     }
     public RoomNode GetRootNode()

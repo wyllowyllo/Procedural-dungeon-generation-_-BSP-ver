@@ -246,15 +246,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5790c0d49e46d4fb9e4fc6498a2ddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  type: 3
   unitSize: 5
-  dungeonWidth: 200
-  dungeonHeight: 200
-  roomWidthMin: 30
-  roomHeightMin: 40
-  publicSpaceWidth: 140
-  publicSpaceHeight: 140
-  plazaRadius: 75
+  dungeonWidth: 50
+  dungeonHeight: 50
+  roomWidthMin: 20
+  roomHeightMin: 20
+  publicSpaceWidth: 30
+  publicSpaceHeight: 30
+  plazaRadius: 5
   polygon: 11
   maxIterations: 20
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
