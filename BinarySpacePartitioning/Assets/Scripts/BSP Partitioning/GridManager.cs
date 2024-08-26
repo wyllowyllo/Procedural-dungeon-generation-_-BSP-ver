@@ -8,13 +8,14 @@ using UnityEngine.Tilemaps;
 using Unity.VisualScripting;
 using System;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 public class GridManager
 {
     //Grid배열
     private gridTile[,] dungeonGrid;
     
 
-    int cellSize = 1;
+    int cellSize;
     private int dungeonWidth;
     private int dungeonHeight;
     private int gridWidth;
@@ -51,7 +52,7 @@ public class GridManager
             for(int j=0;j< gridWidth; j++)
             {
                 Vector2Int gridLeftBottom=GridToWorldPosition(i, j);
-                gridTile tile=new gridTile(gridLeftBottom, new Vector2Int(gridLeftBottom.x+cellSize, gridLeftBottom.y+cellSize));
+                gridTile tile=new gridTile(gridLeftBottom, new Vector2Int(gridLeftBottom.x+cellSize, gridLeftBottom.y+cellSize),j, i);
                 FindMasterRoom(tile);
 
                 dungeonGrid[i,j] = tile;
@@ -90,76 +91,65 @@ public class GridManager
 
     public List<Vector2Int> FindPath(Vector2Int startTile, Vector2Int endTile)
     {
+        List<gridTile> openSet = new List<gridTile>();
+        HashSet<gridTile> closedSet = new HashSet<gridTile>();
 
-        //왼쪽, 아래, 오른쪽, 위
-        int[,] dir = new int[,] { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
-        bool[,] visited = new bool[gridHeight, gridWidth];
+      
+        gridTile start = dungeonGrid[startTile.y, startTile.x];
+        start.Init_pathVariables();
+        openSet.Add(start);
 
-        //grid의 행,열 인덱스 값과 그에 해당하는 gridTile전달
-        Block startBlock = new Block(startTile.x, startTile.y,dungeonGrid[startTile.y, startTile.x]);
-        startBlock.PrevBlock=null;
+       
 
-        SortedDictionary<int, List<Block>> blockQueue = new SortedDictionary<int, List<Block>>(); //키값 중복 허용하는 Priority Queue구현. 이때 키는 totalWeight.
-        AddToQueue(blockQueue, startBlock);
+        gridTile current;
+        Stack<gridTile> path = new Stack<gridTile>();
 
-        Block current;
-        Stack<Block> path = new Stack<Block>();
-
-        while (blockQueue.Count != 0)
+        while (openSet.Count > 0)
         {
-            current = GetNextBlock(blockQueue);
-            visited[current.GridY, current.GridX] = true;
-
-            if (current.BlockTile == dungeonGrid[endTile.y, endTile.x]) //목적지 도착시 경로 스택에 저장
+            //최소비용 타일 선택
+            current = openSet[0];
+            for (int i = 1; i < openSet.Count; i++)
             {
-                Block pathBlock = current;
-                while (pathBlock!= null)
+                if (openSet[i].fCost < current.fCost || openSet[i].fCost == current.fCost)
                 {
-                    path.Push(pathBlock);
-                    pathBlock = pathBlock.PrevBlock;
+                    if (openSet[i].hCost < current.hCost)
+                        current = openSet[i];
+                }
+            }
+
+            openSet.Remove(current);
+            closedSet.Add(current);
+
+            if (current == dungeonGrid[endTile.y, endTile.x]) //목적지 도착시 경로 스택에 저장
+            {
+               
+                while (current!= null)
+                {
+                    path.Push(current);
+                    current = current.prev;
                 }
 
                 break;
             }
 
-            for(int i = 0; i < dir.GetLength(0); i++)
+            List<gridTile> neigbours=GetNeighbours(current); //이동 가능한 주변타일
+            foreach(var neighbour in neigbours)
             {
-                int nextX = current.GridX + dir[i, 0];
-                int nextY = current.GridY + dir[i, 1];
-                bool IsPossible = false;
-                //그리드 범위 내인지
-                if(nextX >= 0 && nextX < gridWidth && nextY >= 0 && nextY < gridHeight)
-                {
-                    //같은 방의 타일인지
-                    if (current.BlockTile.GetMasterRoom() == dungeonGrid[nextY, nextX].GetMasterRoom())
-                    {
-                        //방문하지 않았다면
-                        if (!visited[nextY,nextX])
-                        {
-                           IsPossible = true;
-                        }
-                    }
-                    else
-                    {
-                        //다른 방이라면, 두 타일 사이 위치에 출입구가 존재하는지
-                       if(IsEntranceExistBetween(current.BlockTile, dungeonGrid[nextY, nextX]) && !visited[nextY, nextX])
-                        {
-                           IsPossible=true;
-                        }
-                    }
-                }
-                if (IsPossible)
-                {
-                    //블럭 추가
-                    Block nextBlock = new Block(nextX, nextY, dungeonGrid[nextY, nextX]);
-                    nextBlock.PrevBlock = current;
-                    nextBlock.FromStartPointWeight = current.FromStartPointWeight + cellSize;
-                    nextBlock.FromDestPointWeight = (Mathf.Abs(endTile.x - nextX) + Mathf.Abs(endTile.y - nextY)) * cellSize;
+                if (closedSet.Contains(neighbour))
+                    continue;
 
-                    nextBlock.UpdateTotalWeight();
-                    AddToQueue(blockQueue, nextBlock); //TotalWeight 오름차순으로 정렬됨.
+                int new_gcost = current.gCost + GetDistance(current, neighbour);
+                if (new_gcost < neighbour.gCost || !openSet.Contains(neighbour))
+                {
+                    neighbour.gCost = new_gcost;
+                    neighbour.hCost = GetDistance(neighbour, dungeonGrid[endTile.y,endTile.x]);
+                    neighbour.prev = current;
+
+                    if (!openSet.Contains(neighbour))
+                        openSet.Add(neighbour);
                 }
             }
+           
 
         }
 
@@ -170,8 +160,8 @@ public class GridManager
             pathInfo = new List<Vector2Int>();
             while (path.Count > 0)
             {
-                Block block= path.Pop();
-                pathInfo.Add(block.BlockTile.CenterPoint);
+                gridTile tile= path.Pop();
+                pathInfo.Add(tile.CenterPoint);
             }
         }
         //경로 찾지 못했을 때
@@ -183,7 +173,57 @@ public class GridManager
 
         return pathInfo;
     }
-   
+    public List<gridTile> GetNeighbours(gridTile tile)
+    {
+        List<gridTile> neighbours = new List<gridTile>();
+
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if (x == 0 && y == 0)
+                    continue;
+
+                int nextX = tile.gridX + x;
+                int nextY = tile.gridY + y;
+
+              
+                if (nextX >= 0 && nextX < gridWidth && nextY >= 0 && nextY < gridHeight)
+                {
+                
+                    //타일이 속한 방이 다를 경우 그 사이에 출입구 위치 있으면 이동
+                    if (tile.GetMasterRoom() != dungeonGrid[nextY, nextX].GetMasterRoom())
+                    {
+                        //타일이 속한 방이 다를 경우 대각선 이동 금지
+                        if ((x == -1 && y == -1) || (x == 1 && y == 1) || (x == -1 && y == 1) || (x == 1 && y == -1))
+                                continue;
+
+                        else
+                        {
+                            if(!IsEntranceExistBetween(tile, dungeonGrid[nextY, nextX]))
+                                continue;
+                        }
+                    }
+
+                    neighbours.Add(dungeonGrid[nextY, nextX]);
+                }
+            }
+        }
+
+        return neighbours;
+    }
+
+    int GetDistance(gridTile nodeA, gridTile nodeB)
+    {
+        int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
+        int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+
+        //대각선 이동이 가능한 만큼 최대한 대각선으로 이동.
+        if (dstX > dstY)
+            return 7 * dstY + 5 * (dstX - dstY);
+        return 7 * dstX + 5 * (dstY - dstX);
+    }
+
     bool IsEntranceExistBetween(gridTile FromTile, gridTile ToTile)
     {
         bool EntranceExist = false;
@@ -194,7 +234,7 @@ public class GridManager
             {
                 EntranceExist=true; break;
             }
-            if ((FromTile.CenterPoint.y <= door.DoorPosition.y && door.DoorPosition.y <= ToTile.CenterPoint.y) && door.DoorPosition.x == FromTile.CenterPoint.x)
+            else if ((FromTile.CenterPoint.y <= door.DoorPosition.y && door.DoorPosition.y <= ToTile.CenterPoint.y) && door.DoorPosition.x == FromTile.CenterPoint.x)
             {
                 EntranceExist = true; break;
             }
@@ -203,28 +243,7 @@ public class GridManager
         return EntranceExist;
     }
 
-    //Dictionary에 원소 추가
-    private void AddToQueue(SortedDictionary<int, List<Block>> queue, Block block)
-    {
-        if (!queue.ContainsKey(block.TotalWeight))
-        {
-            queue[block.TotalWeight] = new List<Block>();
-        }
-        queue[block.TotalWeight].Add(block);
-    }
-
-    //Dictionary에서 첫번째 원소 가져오기
-    private Block GetNextBlock(SortedDictionary<int, List<Block>> queue)
-    {
-        var firstKey = queue.Keys.First();
-        var block = queue[firstKey][0];
-        queue[firstKey].RemoveAt(0);
-        if (queue[firstKey].Count == 0)
-        {
-            queue.Remove(firstKey);
-        }
-        return block;
-    }
+   
 
 
 }

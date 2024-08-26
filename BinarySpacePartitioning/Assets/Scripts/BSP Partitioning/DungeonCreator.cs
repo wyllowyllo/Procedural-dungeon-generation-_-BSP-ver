@@ -59,14 +59,14 @@ public class DungeonCreator : MonoBehaviour
     List<Vector2Int> EntranceVerticalCandidate;//방문 생성 가능한 세로 벽 좌표(방과 방이 공유하는 선)
     List<Vector2Int> InnerWallHorizontalPos;
     List<Vector2Int> InnerWallVerticalPos;
-   
 
+    GridManager gridManager;
     List<RoomNode> listOfRooms=new List<RoomNode>();
     List<Door> listOfDoors;
-    gridTile[,] tileMap;
+    gridTile[,] tileMap = null;
     RoomNode Ground;
 
-
+    bool flag = false;
     private void Awake()
     {
         
@@ -126,7 +126,28 @@ public class DungeonCreator : MonoBehaviour
        
     }
 
-  
+    private void Update()
+    {
+        if (Input.GetButton("Jump") && !flag&&tileMap!=null)
+        {
+            flag=true;
+            List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(tileMap.GetLength(1) - 1, tileMap.GetLength(0) - 1));
+
+            if (path != null)
+            {
+                foreach (var dot in path)
+                {
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = new Vector3(dot.x, 5, dot.y);
+                }
+            }
+            else
+            {
+                Debug.Log("가능한 경로가 없습니다");
+            }
+        }
+    }
+
 
     public void CreateDungeon()
     {
@@ -679,23 +700,10 @@ public class DungeonCreator : MonoBehaviour
 
     private void CreateGrid()
     {
-        GridManager gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
+        gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
         tileMap = gridManager.DungeonGrid;
 
-        List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(9,0));
-
-        if (path != null)
-        {
-            foreach (var dot in path)
-            {
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = new Vector3(dot.x, 5, dot.y);
-            }
-        }
-        else
-        {
-            Debug.Log("가능한 경로가 없습니다");
-        }
+       
        
     }
 
