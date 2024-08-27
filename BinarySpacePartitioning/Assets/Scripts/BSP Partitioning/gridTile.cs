@@ -39,13 +39,6 @@ public class gridTile
         return masterRoom;
     }
 
-    public void Init_pathVariables()
-    {
-        gCost = 0;
-        hCost = 0;
-        prev = null;
-    }
-
     public int fCost
     {
         get

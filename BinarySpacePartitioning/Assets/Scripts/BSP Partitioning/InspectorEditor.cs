@@ -17,6 +17,7 @@ public class DungeonCreatorEditor : Editor
     SerializedProperty material;
     SerializedProperty wallVertical;
     SerializedProperty wallHorizontal;
+    SerializedProperty playerObj;
     SerializedProperty unitSize;
 
     void OnEnable()
@@ -34,6 +35,7 @@ public class DungeonCreatorEditor : Editor
         material = serializedObject.FindProperty("material");
         wallVertical = serializedObject.FindProperty("wallVertical");
         wallHorizontal = serializedObject.FindProperty("wallHorizontal");
+        playerObj = serializedObject.FindProperty("playerObj");
         unitSize = serializedObject.FindProperty("unitSize");
     }
 
@@ -72,6 +74,7 @@ public class DungeonCreatorEditor : Editor
         EditorGUILayout.PropertyField(material);
         EditorGUILayout.PropertyField(wallHorizontal);
         EditorGUILayout.PropertyField(wallVertical);
+        EditorGUILayout.PropertyField(playerObj);
 
         serializedObject.ApplyModifiedProperties();
     }

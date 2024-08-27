@@ -24,7 +24,7 @@ public class GridManager
     private List<RoomNode> listOfRooms;
     private List<Door> listOfDoors;
 
-    Vector2Int startPoint = Vector2Int.zero;
+    Vector3 startPoint = Vector3.zero;
 
     public gridTile[,] DungeonGrid { get => dungeonGrid; }
 
@@ -65,15 +65,18 @@ public class GridManager
 
     public Vector2Int GridToWorldPosition(int gridRow, int gridCol)
     {
-        int worldX = startPoint.x + gridCol * cellSize;
-        int worldY = startPoint.y + gridRow * cellSize;
+        int worldX = (int)(startPoint.x + gridCol * cellSize);
+        int worldY = (int)(startPoint.y + gridRow * cellSize);
         return new Vector2Int(worldX, worldY); //반환값은 각 타일의 왼쪽 아래 월드좌표
     }
 
-    public Vector2Int WorldToGridPosition(Vector2Int worldPosition, int unitSize = 5)
+    public Vector2Int WorldToGridPosition(Vector3 worldPosition)
     {
-        int gridX = (worldPosition.x - startPoint.x) / unitSize;
-        int gridY = (worldPosition.y - startPoint.y) / unitSize;
+        if (worldPosition.x < 0 || worldPosition.x >= dungeonWidth || worldPosition.z < 0 || worldPosition.z >= dungeonHeight)
+            return new Vector2Int(-1, -1);
+
+        int gridX = (int)((worldPosition.x - startPoint.x) / cellSize);
+        int gridY = (int)((worldPosition.z - startPoint.y) / cellSize); // Z축 사용
         return new Vector2Int(gridX, gridY);
     }
 
@@ -94,9 +97,12 @@ public class GridManager
         List<gridTile> openSet = new List<gridTile>();
         HashSet<gridTile> closedSet = new HashSet<gridTile>();
 
-      
+        InitializePathVariables();
+
         gridTile start = dungeonGrid[startTile.y, startTile.x];
-        start.Init_pathVariables();
+        start.gCost = 0;
+        start.hCost = GetDistance(start, dungeonGrid[endTile.y, endTile.x]);
+       
         openSet.Add(start);
 
        
@@ -171,6 +177,9 @@ public class GridManager
 
         }
 
+        openSet.Clear();
+        closedSet.Clear();
+
         return pathInfo;
     }
     public List<gridTile> GetNeighbours(gridTile tile)
@@ -238,12 +247,28 @@ public class GridManager
             {
                 EntranceExist = true; break;
             }
+            else if ((FromTile.CenterPoint.x >= door.DoorPosition.x && door.DoorPosition.x >= ToTile.CenterPoint.x) && door.DoorPosition.y == FromTile.CenterPoint.y)
+            {
+                EntranceExist = true; break;
+            }
+            else if ((FromTile.CenterPoint.y >= door.DoorPosition.y && door.DoorPosition.y >= ToTile.CenterPoint.y) && door.DoorPosition.x == FromTile.CenterPoint.x)
+            {
+                EntranceExist = true; break;
+            }
         }
 
         return EntranceExist;
     }
 
-   
+    public void InitializePathVariables()
+    {
+        foreach (var tile in dungeonGrid)
+        {
+            tile.gCost = int.MaxValue;
+            tile.hCost = int.MaxValue;
+            tile.prev = null;
+        }
+    }
 
 
 }

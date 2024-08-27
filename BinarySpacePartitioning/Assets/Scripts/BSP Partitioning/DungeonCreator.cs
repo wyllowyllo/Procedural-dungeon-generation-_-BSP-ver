@@ -51,6 +51,7 @@ public class DungeonCreator : MonoBehaviour
     [Header("etc")]
     public Material material; // For Visualizing
     public GameObject wallVertical, wallHorizontal;
+    public GameObject playerObj;
 
     
     List<Vector2Int> WallHorizontalPos; //가로 벽 좌표값 전체
@@ -60,10 +61,10 @@ public class DungeonCreator : MonoBehaviour
     List<Vector2Int> InnerWallHorizontalPos;
     List<Vector2Int> InnerWallVerticalPos;
 
-    GridManager gridManager;
+    public static GridManager gridManager;
     List<RoomNode> listOfRooms=new List<RoomNode>();
     List<Door> listOfDoors;
-    gridTile[,] tileMap = null;
+    
     RoomNode Ground;
 
     bool flag = false;
@@ -123,15 +124,20 @@ public class DungeonCreator : MonoBehaviour
         CreateEntrance();
         InstantiateWall();
         CreateGrid();
-       
+
+        int posX = (listOfRooms[0].TopRightAreaCorner.x + listOfRooms[0].BottomLeftAreaCorner.x) / 2;
+        int posY = (listOfRooms[0].TopRightAreaCorner.y + listOfRooms[0].BottomLeftAreaCorner.y) / 2;
+
+        playerObj.transform.position=new Vector3(posX,5,posY);
+        playerObj.AddComponent<Player>();
     }
 
     private void Update()
     {
-        if (Input.GetButton("Jump") && !flag&&tileMap!=null)
+        if (Input.GetButton("Jump") && !flag)
         {
             flag=true;
-            List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(tileMap.GetLength(1) - 1, tileMap.GetLength(0) - 1));
+            List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(gridManager.DungeonGrid.GetLength(1) - 1, gridManager.DungeonGrid.GetLength(0) - 1));
 
             if (path != null)
             {
@@ -533,7 +539,7 @@ public class DungeonCreator : MonoBehaviour
             1,
             3
         };
-        Mesh mesh=new Mesh();
+       /* Mesh mesh=new Mesh();
         mesh.vertices=vertices;
         mesh.uv=uvs;
         mesh.triangles=triangles;
@@ -546,7 +552,7 @@ public class DungeonCreator : MonoBehaviour
         dungeonFloor.transform.localScale= Vector3.one;
         dungeonFloor.transform.parent = objParent;
         dungeonFloor.GetComponent<MeshFilter>().mesh = mesh;
-        dungeonFloor.GetComponent<MeshRenderer>().material = material;
+        dungeonFloor.GetComponent<MeshRenderer>().material = material;*/
 
 
 
@@ -701,10 +707,6 @@ public class DungeonCreator : MonoBehaviour
     private void CreateGrid()
     {
         gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
-        tileMap = gridManager.DungeonGrid;
-
-       
-       
     }
 
     void SetRoomName()
@@ -719,7 +721,7 @@ public class DungeonCreator : MonoBehaviour
         }
     }
     
-    void OnDrawGizmos()
+    /*void OnDrawGizmos()
     {
        
 
@@ -737,7 +739,7 @@ public class DungeonCreator : MonoBehaviour
             }
         }
 
-    }
+    }*/
 
   
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
