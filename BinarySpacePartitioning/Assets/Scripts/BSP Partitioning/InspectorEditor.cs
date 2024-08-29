@@ -15,8 +15,11 @@ public class DungeonCreatorEditor : Editor
     SerializedProperty polygon;
     SerializedProperty maxIterations;
     SerializedProperty material;
+    SerializedProperty tileObj;
     SerializedProperty wallVertical;
     SerializedProperty wallHorizontal;
+    SerializedProperty entranceVertical;
+    SerializedProperty entranceHorizontal;
     SerializedProperty playerObj;
     SerializedProperty unitSize;
 
@@ -33,8 +36,11 @@ public class DungeonCreatorEditor : Editor
         polygon = serializedObject.FindProperty("polygon");
         maxIterations = serializedObject.FindProperty("maxIterations");
         material = serializedObject.FindProperty("material");
+        tileObj = serializedObject.FindProperty("tileObj");
         wallVertical = serializedObject.FindProperty("wallVertical");
         wallHorizontal = serializedObject.FindProperty("wallHorizontal");
+        entranceVertical = serializedObject.FindProperty("entranceVertical");
+        entranceHorizontal = serializedObject.FindProperty("entranceHorizontal");
         playerObj = serializedObject.FindProperty("playerObj");
         unitSize = serializedObject.FindProperty("unitSize");
     }
@@ -72,8 +78,11 @@ public class DungeonCreatorEditor : Editor
         }
        
         EditorGUILayout.PropertyField(material);
+        EditorGUILayout.PropertyField(tileObj);
         EditorGUILayout.PropertyField(wallHorizontal);
         EditorGUILayout.PropertyField(wallVertical);
+        EditorGUILayout.PropertyField(entranceHorizontal);
+        EditorGUILayout.PropertyField(entranceVertical);
         EditorGUILayout.PropertyField(playerObj);
 
         serializedObject.ApplyModifiedProperties();

@@ -8,8 +8,9 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Color = UnityEngine.Color;
 using System;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
-public enum UNITSIZE {SIZE_1=1, SIZE_5=5, SIZE_10 = 10, SIZE_20 = 20 }
+public enum UNITSIZE {SIZE_2=2, SIZE_5=5, SIZE_10 = 10, SIZE_20 = 20 }
 public enum PUBLICSPACE { none, left_bottom, right_bottom, left_top, right_top, center, plaza } //공용공간 생성 타입
 public class DungeonCreator : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class DungeonCreator : MonoBehaviour
     [Tooltip("단위는 unitSize이며, dungeonHeight를 초과할 수 없습니다.")]
     public int publicSpaceHeight;
 
+    
    
 
     [Header("Plaza 타입 반지름")]
@@ -50,7 +52,9 @@ public class DungeonCreator : MonoBehaviour
 
     [Header("etc")]
     public Material material; // For Visualizing
+    public GameObject tileObj;
     public GameObject wallVertical, wallHorizontal;
+    public GameObject entranceVertical, entranceHorizontal;
     public GameObject playerObj;
 
     
@@ -67,7 +71,7 @@ public class DungeonCreator : MonoBehaviour
     
     RoomNode Ground;
 
-    bool flag = false;
+   
     private void Awake()
     {
         
@@ -125,35 +129,14 @@ public class DungeonCreator : MonoBehaviour
         InstantiateWall();
         CreateGrid();
 
+
+        //Player Spawn
         int posX = (listOfRooms[0].TopRightAreaCorner.x + listOfRooms[0].BottomLeftAreaCorner.x) / 2;
         int posY = (listOfRooms[0].TopRightAreaCorner.y + listOfRooms[0].BottomLeftAreaCorner.y) / 2;
 
-        playerObj.transform.position=new Vector3(posX,5,posY);
+        playerObj.transform.position=new Vector3(posX,0,posY);
         playerObj.AddComponent<Player>();
     }
-
-    private void Update()
-    {
-        if (Input.GetButton("Jump") && !flag)
-        {
-            flag=true;
-            List<Vector2Int> path = gridManager.FindPath(new Vector2Int(0, 0), new Vector2Int(gridManager.DungeonGrid.GetLength(1) - 1, gridManager.DungeonGrid.GetLength(0) - 1));
-
-            if (path != null)
-            {
-                foreach (var dot in path)
-                {
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.position = new Vector3(dot.x, 5, dot.y);
-                }
-            }
-            else
-            {
-                Debug.Log("가능한 경로가 없습니다");
-            }
-        }
-    }
-
 
     public void CreateDungeon()
     {
@@ -577,7 +560,6 @@ public class DungeonCreator : MonoBehaviour
 
         if (wallList.Contains(point))
         {
-            //TODO: 만약 해당 좌표가 공용공간 벽에 해당된다면 추가하지 않고 따로 통로 생성해서 공용공간 통로 수 조절하기
             wallList.Remove(point);
             doorCandidnate.Add(point);
         }
@@ -649,57 +631,60 @@ public class DungeonCreator : MonoBehaviour
             InnerWallVerticalPos.Remove(door.DoorPosition);
         }
 
-        //벽 오브젝트 Instantiate;
+        //통로 오브젝트 Instantiate;
         GameObject entranceGroup = new GameObject("entranceGroup");
         foreach(var door in listOfDoors)
         {
             if (door.DoorOrientation == Orientation.Horizontal)
             {
-                GameObject doorObj = Instantiate(wallHorizontal, new Vector3(door.DoorPosition.x, 5, door.DoorPosition.y), wallHorizontal.transform.rotation, entranceGroup.transform);
-                doorObj.GetComponent<Renderer>().material.color = Color.red;
-                doorObj.transform.localScale = new Vector3((int)unitSize, 10,1);
+                GameObject doorObj = Instantiate(entranceHorizontal, new Vector3(door.DoorPosition.x, 0, door.DoorPosition.y), wallHorizontal.transform.rotation, entranceGroup.transform);
+                
+                
             }
             else
             {
-                GameObject doorObj = Instantiate(wallVertical, new Vector3(door.DoorPosition.x, 5, door.DoorPosition.y), wallVertical.transform.rotation, entranceGroup.transform);
-                doorObj.GetComponent<Renderer>().material.color = Color.red;
-                doorObj.transform.localScale = new Vector3(1, 10, (int)unitSize);
+                GameObject doorObj = Instantiate(entranceVertical, new Vector3(door.DoorPosition.x, 0, door.DoorPosition.y), wallVertical.transform.rotation, entranceGroup.transform);
+                
             }
         }
         
 
 
     }
+
+   
+
     void InstantiateWall()
     {
-        //unitSize에 맞게 프리펩 크기조정
-        wallHorizontal.transform.localScale = new Vector3((int)unitSize,10,1);
-        wallVertical.transform.localScale = new Vector3(1, 10, (int)unitSize);
-
+       
         GameObject wallGroup = new GameObject("wallGroup");
         foreach(var point in WallHorizontalPos)
         {
-            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
-            gameObject.GetComponent<Renderer>().material.color = Color.white;
+            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
+            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+           
         }
         foreach (var point in WallVerticalPos)
         {
-            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation, wallGroup.transform);
-            gameObject.GetComponent<Renderer>().material.color = Color.white;
+            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
+            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+            
         }
 
 
         foreach (var point in InnerWallHorizontalPos)
         {
-            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 5, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
-            gameObject.GetComponent<Renderer>().material.color = Color.white;
+            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
+            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+           
 
 
         }
         foreach (var point in InnerWallVerticalPos)
         {
-            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 5, point.y), wallVertical.transform.rotation, wallGroup.transform);
-            gameObject.GetComponent<Renderer>().material.color = Color.white;
+            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
+            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+            
         }
 
     }
@@ -707,6 +692,12 @@ public class DungeonCreator : MonoBehaviour
     private void CreateGrid()
     {
         gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
+
+        GameObject tileGroup = new GameObject("tileGroup");
+        foreach (var tile in gridManager.DungeonGrid)
+        {
+            GameObject gameObject = Instantiate(tileObj, new Vector3(tile.CenterPoint.x, 0, tile.CenterPoint.y), tileObj.transform.rotation, tileGroup.transform);
+        }
     }
 
     void SetRoomName()
@@ -720,28 +711,11 @@ public class DungeonCreator : MonoBehaviour
             }
         }
     }
-    
-    /*void OnDrawGizmos()
-    {
-       
 
-        if (tileMap != null)
-        {
-            for (int x = 0; x < tileMap.GetLength(0); x++)
-            {
-                for (int y = 0; y < tileMap.GetLength(1); y++)
-                {
-                    Vector2Int worldPos = tileMap[x,y].CenterPoint;
-                    Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-                    Gizmos.DrawCube(new Vector3(worldPos.x, 0, worldPos.y), Vector3.one * (int)unitSize);
-                   
-                }
-            }
-        }
-
-    }*/
 
   
+
+
     private void OnValidate() //인스펙터 상에서 변수 범위 제한
     {
         dungeonWidth = Mathf.Max((int)unitSize, Mathf.RoundToInt(dungeonWidth / (int)unitSize) * (int)unitSize);

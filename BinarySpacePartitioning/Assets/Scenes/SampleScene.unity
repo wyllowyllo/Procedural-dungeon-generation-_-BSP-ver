@@ -246,20 +246,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5790c0d49e46d4fb9e4fc6498a2ddf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 4
-  unitSize: 5
-  dungeonWidth: 200
-  dungeonHeight: 200
-  roomWidthMin: 45
-  roomHeightMin: 45
+  type: 0
+  unitSize: 2
+  dungeonWidth: 50
+  dungeonHeight: 50
+  roomWidthMin: 20
+  roomHeightMin: 24
   publicSpaceWidth: 130
-  publicSpaceHeight: 125
+  publicSpaceHeight: 120
   plazaRadius: 5
   polygon: 11
   maxIterations: 20
   material: {fileID: 2100000, guid: 470eb01b8a5aed340a34b40a6c865eec, type: 2}
-  wallVertical: {fileID: 1380684159269207902, guid: 2532ea0f42bf98646b5d52b2a569d0d9, type: 3}
-  wallHorizontal: {fileID: 940688870511245070, guid: eabbf2970999390439659a8606fc9ded, type: 3}
+  tileObj: {fileID: 9100508158649072905, guid: e348e7143b6247b488737e4be26fb038, type: 3}
+  wallVertical: {fileID: 6229247520373792897, guid: 4826cad75b5707b4fb6fba1cb67e30ca, type: 3}
+  wallHorizontal: {fileID: 6229247520373792897, guid: 3ad7a1cffb2556547a8b7e60fd320431, type: 3}
+  entranceVertical: {fileID: 4463566038210007903, guid: 18ec89c2932afee45a27db0915d58d02, type: 3}
+  entranceHorizontal: {fileID: 4463566038210007903, guid: 49a5f24a081cbbc44bd23d76c2869723, type: 3}
   playerObj: {fileID: 1787035576}
 --- !u!4 &756628171
 Transform:
@@ -313,7 +316,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 1
@@ -406,11 +409,11 @@ GameObject:
   - component: {fileID: 1877611682}
   m_Layer: 0
   m_Name: Terrain
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!154 &1877611682
 TerrainCollider:
   m_ObjectHideFlags: 0

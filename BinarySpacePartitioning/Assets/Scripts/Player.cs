@@ -6,27 +6,43 @@ using UnityEngine.Scripting.APIUpdating;
 
 public class Player : MonoBehaviour
 {
-    // Start is called before the first frame update
+   
     public Camera camera;
     public float moveSpeed;
+    public float turnSpeed;
+    public float moveDelay;
 
     Vector2Int playerPosInGrid;
     Vector2Int destPosInGrid;
+  
+    
+
     bool isMoving;
 
-    // Update is called once per frame
+    
 
     private void Awake()
     {
         camera = FindObjectOfType<MainCamera>().GetComponent<Camera>();
         moveSpeed = 10.0f;
+        turnSpeed = 1f;
+        moveDelay = 0.0001f;
+
+        transform.localScale = new Vector3(transform.localScale.x/2, transform.localScale.y/2, transform.localScale.z/2);
+        float bodyHalfSize = GetComponent<Collider>().bounds.extents.y;
+        transform.position = new Vector3(transform.position.x,0+bodyHalfSize, transform.position.z);
+
+
+
+
     }
     void Update()
     {
+        
         Move();
     }
 
-
+   
     private void Move()
     {
         if (!Input.GetMouseButtonDown(1)||isMoving)
@@ -50,12 +66,7 @@ public class Player : MonoBehaviour
                 if (path != null)
                 {
                     isMoving= true;
-                    /* foreach (var dot in path)
-                     {
-                         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                         cube.transform.position = new Vector3(dot.x, 5, dot.y);
-
-                     }*/
+                   
                     StopAllCoroutines();
                     StartCoroutine(FollowPath(path));
 
@@ -80,10 +91,14 @@ public class Player : MonoBehaviour
         foreach (var point in path)
         {
             Vector3 targetPosition = new Vector3(point.x, transform.position.y, point.y);
+            transform.LookAt(targetPosition);
+
+
             while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-                yield return null;
+              
+                yield return new WaitForSeconds(moveDelay);
             }
         }
         isMoving = false;

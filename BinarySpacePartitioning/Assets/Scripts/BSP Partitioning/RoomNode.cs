@@ -11,6 +11,7 @@ public class RoomNode
     public Vector2Int BottomRightAreaCorner { get; set; }
     public Vector2Int TopRightAreaCorner { get; set; }
     public Vector2Int TopLeftAreaCorner { get; set; }
+   
 
     //자식노드 리스트
     List<RoomNode> childrenNodeList;
@@ -28,7 +29,7 @@ public class RoomNode
         this.TopRightAreaCorner = topRightAreaCorner;
         this.BottomRightAreaCorner = new Vector2Int(topRightAreaCorner.x, bottomLeftAreaCorner.y);
         this.TopLeftAreaCorner = new Vector2Int(bottomLeftAreaCorner.x, topRightAreaCorner.y);
-        this.TreeIndex = index;
+       
 
         childrenNodeList = new List<RoomNode>();
         this.Parent = parentNode;
