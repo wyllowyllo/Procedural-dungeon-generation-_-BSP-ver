@@ -16,10 +16,13 @@ public class DungeonCreatorEditor : Editor
     SerializedProperty maxIterations;
     SerializedProperty material;
     SerializedProperty tileObj;
+    SerializedProperty ceilingObj;
     SerializedProperty wallVertical;
     SerializedProperty wallHorizontal;
     SerializedProperty entranceVertical;
     SerializedProperty entranceHorizontal;
+    SerializedProperty wallWithBulbVertical;
+    SerializedProperty wallWithBulbHorizontal;
     SerializedProperty playerObj;
     SerializedProperty unitSize;
 
@@ -37,10 +40,13 @@ public class DungeonCreatorEditor : Editor
         maxIterations = serializedObject.FindProperty("maxIterations");
         material = serializedObject.FindProperty("material");
         tileObj = serializedObject.FindProperty("tileObj");
+        ceilingObj= serializedObject.FindProperty("ceilingObj");
         wallVertical = serializedObject.FindProperty("wallVertical");
         wallHorizontal = serializedObject.FindProperty("wallHorizontal");
         entranceVertical = serializedObject.FindProperty("entranceVertical");
         entranceHorizontal = serializedObject.FindProperty("entranceHorizontal");
+        wallWithBulbVertical = serializedObject.FindProperty("wallWithBulbVertical");
+        wallWithBulbHorizontal = serializedObject.FindProperty("wallWithBulbHorizontal");
         playerObj = serializedObject.FindProperty("playerObj");
         unitSize = serializedObject.FindProperty("unitSize");
     }
@@ -79,11 +85,14 @@ public class DungeonCreatorEditor : Editor
        
         EditorGUILayout.PropertyField(material);
         EditorGUILayout.PropertyField(tileObj);
+        //EditorGUILayout.PropertyField(ceilingObj);
         EditorGUILayout.PropertyField(wallHorizontal);
         EditorGUILayout.PropertyField(wallVertical);
         EditorGUILayout.PropertyField(entranceHorizontal);
         EditorGUILayout.PropertyField(entranceVertical);
-        EditorGUILayout.PropertyField(playerObj);
+        EditorGUILayout.PropertyField(wallWithBulbHorizontal);
+        EditorGUILayout.PropertyField(wallWithBulbVertical);
+        //EditorGUILayout.PropertyField(playerObj);
 
         serializedObject.ApplyModifiedProperties();
     }

@@ -53,9 +53,11 @@ public class DungeonCreator : MonoBehaviour
     [Header("etc")]
     public Material material; // For Visualizing
     public GameObject tileObj;
+    //public GameObject ceilingObj;
     public GameObject wallVertical, wallHorizontal;
     public GameObject entranceVertical, entranceHorizontal;
-    public GameObject playerObj;
+    public GameObject wallWithBulbVertical, wallWithBulbHorizontal;
+    //public GameObject playerObj;
 
     
     List<Vector2Int> WallHorizontalPos; //가로 벽 좌표값 전체
@@ -134,8 +136,9 @@ public class DungeonCreator : MonoBehaviour
         int posX = (listOfRooms[0].TopRightAreaCorner.x + listOfRooms[0].BottomLeftAreaCorner.x) / 2;
         int posY = (listOfRooms[0].TopRightAreaCorner.y + listOfRooms[0].BottomLeftAreaCorner.y) / 2;
 
-        playerObj.transform.position=new Vector3(posX,0,posY);
-        playerObj.AddComponent<Player>();
+        /*Vector3 spawnPos= new Vector3(posX, 0, posY);
+        GameObject PlayerAvatar=Instantiate(playerObj, spawnPos, Quaternion.identity);
+        PlayerAvatar.AddComponent<Player>();*/
     }
 
     public void CreateDungeon()
@@ -658,34 +661,67 @@ public class DungeonCreator : MonoBehaviour
     {
        
         GameObject wallGroup = new GameObject("wallGroup");
-        foreach(var point in WallHorizontalPos)
+        GameObject obj;
+        foreach (var point in WallHorizontalPos)
         {
-            GameObject gameObject=Instantiate(wallHorizontal, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
-            //gameObject.GetComponent<Renderer>().material.color = Color.white;
            
+            int ranNum = Random.Range(0, 10);
+           
+            if (ranNum < 7)
+                obj = wallHorizontal;
+            else
+                obj = wallWithBulbHorizontal;
+
+
+            GameObject gameObject = Instantiate(obj, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
         }
         foreach (var point in WallVerticalPos)
         {
-            GameObject gameObject=Instantiate(wallVertical, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
-            //gameObject.GetComponent<Renderer>().material.color = Color.white;
-            
+            int ranNum = Random.Range(0, 10);
+            if (ranNum < 7)
+                obj = wallVertical;
+            else
+                obj = wallWithBulbVertical;
+
+            GameObject gameObject = Instantiate(obj, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
+
         }
 
 
         foreach (var point in InnerWallHorizontalPos)
         {
-            GameObject gameObject = Instantiate(wallHorizontal, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
-            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+
+            int ranNum = Random.Range(0, 10);
+
+            if (ranNum < 7)
+                obj = wallHorizontal;
+            else
+                obj = wallWithBulbHorizontal;
+
+            GameObject gameObject = Instantiate(obj, new Vector3(point.x, 0, point.y), wallHorizontal.transform.rotation, wallGroup.transform);
+           
            
 
 
         }
         foreach (var point in InnerWallVerticalPos)
         {
-            GameObject gameObject = Instantiate(wallVertical, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
-            //gameObject.GetComponent<Renderer>().material.color = Color.white;
+
+            int ranNum = Random.Range(0, 10);
+
+            if (ranNum < 7)
+                obj = wallVertical;
+            else
+                obj = wallWithBulbVertical;
+
+            GameObject gameObject = Instantiate(obj, new Vector3(point.x, 0, point.y), wallVertical.transform.rotation, wallGroup.transform);
+            
             
         }
+
+
+       
+
 
     }
 
@@ -694,11 +730,24 @@ public class DungeonCreator : MonoBehaviour
         gridManager = new GridManager(dungeonWidth, dungeonHeight, listOfRooms, listOfDoors, (int)unitSize);
 
         GameObject tileGroup = new GameObject("tileGroup");
+        GameObject ceilingGroup = new GameObject("ceilingGroup");
+
+
+        //바닥 생성
         foreach (var tile in gridManager.DungeonGrid)
         {
             GameObject gameObject = Instantiate(tileObj, new Vector3(tile.CenterPoint.x, 0, tile.CenterPoint.y), tileObj.transform.rotation, tileGroup.transform);
         }
+
+        /*//천장 생성
+        foreach (var tile in gridManager.DungeonGrid)
+        {
+            GameObject gameObject = Instantiate(ceilingObj, new Vector3(tile.CenterPoint.x, 3, tile.CenterPoint.y), ceilingObj.transform.rotation, ceilingGroup.transform);
+        }*/
+
+
     }
+    
 
     void SetRoomName()
     {
